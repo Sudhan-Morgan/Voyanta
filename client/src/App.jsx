@@ -7,6 +7,9 @@ import LandingPage from './pages/public/LandingPage';
 import LoginPage from './pages/public/LoginPage';
 import RegisterPage from './pages/public/RegisterPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
+import MyTripsPage from './pages/trips/MyTripsPage';
+import CreateTripPage from './pages/trips/CreateTripPage';
+import TripDetailsPage from './pages/trips/TripDetailsPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -27,7 +30,7 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Placeholder Pages for upcoming phases
+// Placeholder Pages for upcoming integrations
 const ExplorePage = () => (
   <div className="max-w-7xl mx-auto px-4 py-16 text-center">
     <h1 className="text-3xl font-bold text-slate-900">Explore Destinations</h1>
@@ -39,13 +42,6 @@ const AIPlannerPage = () => (
   <div className="max-w-7xl mx-auto px-4 py-16 text-center">
     <h1 className="text-3xl font-bold text-slate-900">AI Trip Planner</h1>
     <p className="text-slate-500 mt-2">Tell us your destination and budget — our AI builds your day-by-day plan.</p>
-  </div>
-);
-
-const MyTripsPage = () => (
-  <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-    <h1 className="text-3xl font-bold text-slate-900">My Trips</h1>
-    <p className="text-slate-500 mt-2">Your personalized upcoming and past travel itineraries.</p>
   </div>
 );
 
@@ -85,6 +81,22 @@ export default function App() {
                 element={
                   <ProtectedRoute>
                     <MyTripsPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/trips/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateTripPage />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/trips/:id"
+                element={
+                  <ProtectedRoute>
+                    <TripDetailsPage />
                   </ProtectedRoute>
                 }
               />
