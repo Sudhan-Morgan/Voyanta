@@ -21,7 +21,7 @@ const protect = async (req, res, next) => {
   try {
     const decoded = jwt.verify(
       token,
-      process.env.JWT_SECRET || 'travelmate_super_secret_dev_key_2026'
+      process.env.JWT_SECRET || 'voyanta_super_secret_dev_key_2026'
     );
 
     const user = await User.findById(decoded.id);

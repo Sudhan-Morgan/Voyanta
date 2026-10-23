@@ -1,7 +1,7 @@
-# TravelMate 🌍✈️
+# Voyanta 🌍✈️
 > **AI-Powered Collaborative Travel Planning Platform**
 
-TravelMate is a modern full-stack web application designed to help travelers plan trips seamlessly, generate AI-assisted itineraries, explore destinations with interactive maps, track and split travel budgets, and coordinate collaboratively with travel companions.
+Voyanta is a modern full-stack web application designed to help travelers plan trips seamlessly, generate AI-assisted itineraries, explore destinations with interactive maps, track and split travel budgets, and coordinate collaboratively with travel companions.
 
 ---
 
@@ -29,7 +29,7 @@ TravelMate is a modern full-stack web application designed to help travelers pla
 ## 📁 Repository Structure
 
 ```text
-travelmate/
+voyanta/
 ├── client/                     # Frontend React Application
 │   ├── public/                 # Static assets
 │   ├── src/

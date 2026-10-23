@@ -45,7 +45,7 @@ export default function LoginPage() {
             <Compass className="w-7 h-7" />
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-            Welcome back to TravelMate
+            Welcome back to Voyanta
           </h2>
           <p className="mt-2 text-sm text-slate-500">
             Sign in to continue planning your unforgettable adventures
