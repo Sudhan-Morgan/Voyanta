@@ -20,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/trips', require('./src/routes/tripRoutes'));
 app.use('/api/destinations', require('./src/routes/destinationRoutes'));
+app.use('/api/ai', require('./src/routes/aiRoutes'));
 
 // Health check route
 app.get('/api/health', (req, res) => {
