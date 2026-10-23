@@ -21,4 +21,7 @@ router.route('/:id')
   .patch(updateTrip)
   .delete(deleteTrip);
 
+// Nested routes for trip expenses
+router.use('/:tripId/expenses', require('./expenseRoutes'));
+
 module.exports = router;
