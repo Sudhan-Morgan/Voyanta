@@ -12,6 +12,7 @@ import CreateTripPage from './pages/trips/CreateTripPage';
 import TripDetailsPage from './pages/trips/TripDetailsPage';
 
 import ExplorePage from './pages/public/ExplorePage';
+import AIPlannerPage from './pages/public/AIPlannerPage';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -33,13 +34,6 @@ const ProtectedRoute = ({ children }) => {
 };
 
 // Placeholder Pages for upcoming integrations
-
-const AIPlannerPage = () => (
-  <div className="max-w-7xl mx-auto px-4 py-16 text-center">
-    <h1 className="text-3xl font-bold text-slate-900">AI Trip Planner</h1>
-    <p className="text-slate-500 mt-2">Tell us your destination and budget — our AI builds your day-by-day plan.</p>
-  </div>
-);
 
 const ProfilePage = () => (
   <div className="max-w-7xl mx-auto px-4 py-16 text-center">
