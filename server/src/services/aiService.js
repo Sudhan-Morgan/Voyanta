@@ -1,0 +1,511 @@
+/**
+ * AI Service for Voyanta Travel Planner
+ * Integrates with Google Gemini API for dynamic travel itinerary generation,
+ * with an intelligent fallback engine tailored for Sri Lankan & global destinations.
+ */
+
+// Curated destination blueprints for Sri Lanka and general travel
+const DESTINATION_KNOWLEDGE = {
+  ella: {
+    title: "Ella Hill Country Adventure",
+    coverImage: "https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=1200&q=80",
+    highlights: ["Nine Arches Bridge", "Little Adam's Peak", "Ravana Falls", "Ella Rock hike", "Demodara Loop"],
+    activitiesPool: [
+      {
+        title: "Sunrise Hike to Little Adam's Peak",
+        locationName: "Little Adam's Peak, Ella",
+        startTime: "06:00 AM",
+        endTime: "08:30 AM",
+        category: "Hiking & Nature",
+        description: "Catch a panoramic 360° sunrise over Ella Gap and the surrounding tea valleys. Moderate 45-minute climb.",
+        estimatedCost: 0
+      },
+      {
+        title: "Nine Arches Bridge Train Viewing & Photography",
+        locationName: "Nine Arches Bridge, Demodara",
+        startTime: "09:30 AM",
+        endTime: "11:30 AM",
+        category: "Sightseeing",
+        description: "Watch the scenic blue highland train roll over the iconic colonial stone viaduct amidst lush jungle.",
+        estimatedCost: 500
+      },
+      {
+        title: "Traditional Sri Lankan Rice & Curry Cooking Class",
+        locationName: "Ella Town Spice Garden",
+        startTime: "12:30 PM",
+        endTime: "02:30 PM",
+        category: "Food & Culture",
+        description: "Learn authentic clay pot curry preparation using freshly harvested local spices, coconut milk, and dhal.",
+        estimatedCost: 3500
+      },
+      {
+        title: "Swim & Relax at Ravana Falls & Caves",
+        locationName: "Ravana Falls, Wellawaya Road",
+        startTime: "03:30 PM",
+        endTime: "05:30 PM",
+        category: "Sightseeing",
+        description: "Cool off by the cascades of one of Sri Lanka's widest waterfalls, steeped in Ramayana legend.",
+        estimatedCost: 200
+      },
+      {
+        title: "Sunset Chilling & Live Music at Cafe Chill",
+        locationName: "Cafe Chill, Main Street Ella",
+        startTime: "07:00 PM",
+        endTime: "10:00 PM",
+        category: "Nightlife & Dining",
+        description: "Sip Ceylon tea-infused cocktails or smoothies with fellow travelers in this vibrant open-air lounge.",
+        estimatedCost: 2500
+      },
+      {
+        title: "Trek through Tea Plantations to Ella Rock",
+        locationName: "Ella Rock Summit",
+        startTime: "06:30 AM",
+        endTime: "11:00 AM",
+        category: "Adventure Trekking",
+        description: "Challenging trek along railway tracks and eucalyptus forests rewarded with jaw-dropping views over the southern plains.",
+        estimatedCost: 1000
+      },
+      {
+        title: "Ceylon Tea Factory Guided Tour & Tasting",
+        locationName: "Halpewatte Tea Factory",
+        startTime: "02:00 PM",
+        endTime: "04:00 PM",
+        category: "Culture & Industry",
+        description: "Discover the full orthodox black tea manufacturing process from plucking to drying and tea cup grading.",
+        estimatedCost: 1500
+      }
+    ],
+    tips: [
+      "Book the Kandy to Ella train ticket well in advance for reserved observation car seats.",
+      "Wear trail running shoes with good grip for the morning hikes as mist can make slopes slippery.",
+      "Tuk-tuks in Ella town are readily available; negotiate or agree on rates before departure."
+    ],
+    checklist: ["Light rain jacket", "Hiking boots or runners", "Insect repellent", "Sun protection", "Power bank", "Cash in LKR"]
+  },
+  galle: {
+    title: "Galle Colonial Heritage & Coastal Charms",
+    coverImage: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=1200&q=80",
+    highlights: ["Galle Fort Ramparts", "Galle Lighthouse", "Unawatuna Beach", "Dutch Reformed Church", "Maritime Museum"],
+    activitiesPool: [
+      {
+        title: "Morning Walking Tour of Historic Galle Fort",
+        locationName: "Galle Fort Ramparts",
+        startTime: "08:00 AM",
+        endTime: "10:30 AM",
+        category: "History & Architecture",
+        description: "Stroll along 400-year-old UNESCO Dutch ramparts, Old Gate, and cobblestone alleys lined with heritage villas.",
+        estimatedCost: 0
+      },
+      {
+        title: "Galle Fort Lighthouse & Flag Rock Panorama",
+        locationName: "Galle Lighthouse Point",
+        startTime: "11:00 AM",
+        endTime: "12:30 PM",
+        category: "Sightseeing",
+        description: "Capture iconic photos of the gleaming white lighthouse backed by swaying coconut palms and turquoise waves.",
+        estimatedCost: 0
+      },
+      {
+        title: "Fresh Seafood Lunch at Pedlar's Street",
+        locationName: "Pedlar's Street, Galle Fort",
+        startTime: "01:00 PM",
+        endTime: "02:30 PM",
+        category: "Dining",
+        description: "Sample fresh butter garlic prawns, Jaffna crab curry, and homemade ginger beer in a restored Dutch veranda.",
+        estimatedCost: 3800
+      },
+      {
+        title: "Surfing or Swimming at Unawatuna Bay",
+        locationName: "Unawatuna Beach",
+        startTime: "03:30 PM",
+        endTime: "06:00 PM",
+        category: "Water Sports & Beach",
+        description: "Calm, golden sandy beach ideal for swimming, stand-up paddleboarding, or beginner surf lessons.",
+        estimatedCost: 2000
+      },
+      {
+        title: "Sunset Rampart Walk & Street Musician Vibes",
+        locationName: "Sun Bastion, Galle Fort",
+        startTime: "06:15 PM",
+        endTime: "07:45 PM",
+        category: "Relaxation",
+        description: "Watch the Indian Ocean sunset as kites fly high and local musicians play acoustic melodies.",
+        estimatedCost: 0
+      },
+      {
+        title: "Sea Turtle Conservation Hatchery Visit",
+        locationName: "Habaraduwa Turtle Hatchery",
+        startTime: "09:30 AM",
+        endTime: "11:30 AM",
+        category: "Wildlife Conservation",
+        description: "Learn about the rehabilitation of injured sea turtles and release hatchlings safely into the ocean.",
+        estimatedCost: 1500
+      }
+    ],
+    tips: [
+      "Midday within the fort walls can be humid; plan indoor museums or cafe breaks between 12 PM - 3 PM.",
+      "Support ethical handmade lace and gemstone craft shops located in Pedlar Street and Church Street.",
+      "Tuk-tuk from Galle Fort to Unawatuna takes only 15 minutes."
+    ],
+    checklist: ["Swimwear", "Polarized sunglasses", "Reef-safe sunscreen", "Comfortable walking sandals", "Canvas tote bag"]
+  },
+  kandy: {
+    title: "Kandy Sacred Relics & Royal Valley",
+    coverImage: "https://images.unsplash.com/photo-1588598198321-9735fd52455b?auto=format&fit=crop&w=1200&q=80",
+    highlights: ["Temple of the Sacred Tooth Relic", "Peradeniya Royal Botanical Gardens", "Kandy Lake", "Cultural Dance Show"],
+    activitiesPool: [
+      {
+        title: "Pay Homage at Temple of the Sacred Tooth Relic (Sri Dalada Maligawa)",
+        locationName: "Sri Dalada Maligawa, Kandy",
+        startTime: "08:30 AM",
+        endTime: "11:00 AM",
+        category: "Cultural Heritage",
+        description: "Witness the sacred morning puja ritual, gilded golden roof, and ancient royal palace complex.",
+        estimatedCost: 2000
+      },
+      {
+        title: "Leisure Walk around Scenic Kandy Lake",
+        locationName: "Kandy Lake Circular Road",
+        startTime: "11:30 AM",
+        endTime: "12:30 PM",
+        category: "Sightseeing",
+        description: "Shaded stroll around the artificial lake built by the last king of Kandy, observing water monitors and pelicans.",
+        estimatedCost: 0
+      },
+      {
+        title: "Highland Spice Garden & Traditional Herbal Lunch",
+        locationName: "Peradeniya Heritage Kitchen",
+        startTime: "01:00 PM",
+        endTime: "02:30 PM",
+        category: "Dining & Wellness",
+        description: "Sample fragrant cardamom-infused curries and herbal teas inspired by indigenous Ayurvedic recipes.",
+        estimatedCost: 2800
+      },
+      {
+        title: "Royal Botanical Gardens of Peradeniya",
+        locationName: "Peradeniya Gardens, Kandy",
+        startTime: "03:00 PM",
+        endTime: "05:30 PM",
+        category: "Nature & Flora",
+        description: "Wander through the giant Javan fig tree lawn, royal palm avenues, and over 4,000 species of tropical orchids.",
+        estimatedCost: 3000
+      },
+      {
+        title: "Traditional Kandyan Drumming & Fire Walking Performance",
+        locationName: "Kandy Cultural Centre",
+        startTime: "06:00 PM",
+        endTime: "07:30 PM",
+        category: "Live Cultural Show",
+        description: "Mesmerizing display of traditional acrobatic dance, heavy Geta Beraya percussion, and fire-walking rites.",
+        estimatedCost: 2500
+      }
+    ],
+    tips: [
+      "Dress conservatively for the Temple of the Tooth (shoulders and knees must be covered; white clothing is preferred).",
+      "Kandy can experience brief afternoon showers; keep a compact umbrella handy.",
+      "Catch the morning puja ceremony around 09:30 AM or evening puja at 06:30 PM for the most spiritual experience."
+    ],
+    checklist: ["Modest white/light clothing for temples", "Slip-on shoes for temple entry", "Compact umbrella", "Camera"]
+  },
+  sigiriya: {
+    title: "Sigiriya Ancient Citadel & Cultural Triangle",
+    coverImage: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=1200&q=80",
+    highlights: ["Sigiriya Lion Rock Fortress", "Pidurangala Rock", "Dambulla Cave Temple", "Minneriya Elephant Safari"],
+    activitiesPool: [
+      {
+        title: "Climb the Iconic Sigiriya Lion Rock Fortress",
+        locationName: "Sigiriya Lion Rock",
+        startTime: "06:30 AM",
+        endTime: "10:00 AM",
+        category: "UNESCO World Heritage",
+        description: "Ascend King Kashyapa's 5th-century palace summit past ancient frescoes, mirror walls, and colossal lion paws.",
+        estimatedCost: 10500
+      },
+      {
+        title: "Authentic Village Safari & Catamaran Ride",
+        locationName: "Hiriwadunna Eco Village",
+        startTime: "11:30 AM",
+        endTime: "02:00 PM",
+        category: "Cultural Immersion",
+        description: "Ride an authentic bullock cart, cross a lotus lake on a wooden catamaran, and enjoy a village lunch in a mud hut.",
+        estimatedCost: 3500
+      },
+      {
+        title: "Wild Elephant Jeep Safari at Minneriya / Kaudulla National Park",
+        locationName: "Minneriya National Park",
+        startTime: "03:00 PM",
+        endTime: "06:30 PM",
+        category: "Wildlife Safari",
+        description: "Witness the world-famous 'Elephant Gathering' where herds of over 150 wild elephants congregate around the ancient tank reservoir.",
+        estimatedCost: 12000
+      },
+      {
+        title: "Sunrise Hike up Pidurangala Rock",
+        locationName: "Pidurangala Rock Base",
+        startTime: "05:00 AM",
+        endTime: "07:30 AM",
+        category: "Adventure Trekking",
+        description: "Moderate boulder scramble rewarding hikers with the most majestic direct vista of Sigiriya Rock bathed in dawn light.",
+        estimatedCost: 1000
+      },
+      {
+        title: "Explore Dambulla Golden Royal Rock Temple",
+        locationName: "Dambulla Cave Temples",
+        startTime: "09:30 AM",
+        endTime: "12:00 PM",
+        category: "Sacred Art & History",
+        description: "Visit 5 monumental cave sanctuaries housing 153 Buddha statues and stunning ancient ceiling murals.",
+        estimatedCost: 2000
+      }
+    ],
+    tips: [
+      "Climb Sigiriya as early as possible (gates open at 06:30 AM) to beat both midday heat and crowds.",
+      "Bring plenty of drinking water; no plastic disposable bottles are permitted at the summit checkpoint.",
+      "Pidurangala has active monastic grounds at the base; keep shoulders and knees covered until past the temple."
+    ],
+    checklist: ["Sturdy walking shoes", "Electrolyte packets", "Sun hat and sunglasses", "Modest sarong for cave temples"]
+  }
+};
+
+/**
+ * Fallback generator when Gemini API key is missing or offline
+ */
+const generateFallbackItinerary = (params) => {
+  const {
+    destination = "Sri Lanka",
+    duration = 3,
+    budget = "moderate",
+    travelStyle = "balanced",
+    travelersCount = 2,
+    interests = []
+  } = params;
+
+  const destKey = destination.toLowerCase().trim();
+  const matchedData = Object.keys(DESTINATION_KNOWLEDGE).find((k) => destKey.includes(k));
+  const blueprint = matchedData ? DESTINATION_KNOWLEDGE[matchedData] : null;
+
+  const daysCount = Math.max(1, Math.min(Number(duration) || 3, 14));
+  const days = [];
+
+  const defaultActivities = [
+    {
+      title: `Morning Highlights Tour of ${destination}`,
+      locationName: `${destination} Central Landmark`,
+      startTime: "09:00 AM",
+      endTime: "11:30 AM",
+      category: "Sightseeing",
+      description: `Discover the top historical and scenic hotspots in ${destination} with an experienced local guide.`,
+      estimatedCost: budget === "luxury" ? 6000 : budget === "budget" ? 800 : 2500
+    },
+    {
+      title: "Local Culinary Exploration & Lunch",
+      locationName: `${destination} Heritage Eatery`,
+      startTime: "12:30 PM",
+      endTime: "02:00 PM",
+      category: "Food & Dining",
+      description: "Taste traditional specialty dishes, fresh tropical fruits, and signature regional desserts.",
+      estimatedCost: budget === "luxury" ? 8000 : budget === "budget" ? 1200 : 3500
+    },
+    {
+      title: "Scenic Landscape & Photography Excursion",
+      locationName: `${destination} Viewpoint Point`,
+      startTime: "03:30 PM",
+      endTime: "05:30 PM",
+      category: "Nature & Leisure",
+      description: "Capture golden hour panoramic shots and unwind surrounded by picturesque views.",
+      estimatedCost: budget === "luxury" ? 4000 : 500
+    },
+    {
+      title: "Sunset Evening Relaxation & Dinner",
+      locationName: `${destination} Town Centre`,
+      startTime: "07:00 PM",
+      endTime: "09:30 PM",
+      category: "Dining & Nightlife",
+      description: "Relax at a top-rated dining spot and enjoy refreshing beverages and acoustic tunes.",
+      estimatedCost: budget === "luxury" ? 9000 : budget === "budget" ? 1500 : 4000
+    }
+  ];
+
+  const pool = blueprint ? blueprint.activitiesPool : defaultActivities;
+
+  for (let i = 1; i <= daysCount; i++) {
+    const dayTheme = i === 1
+      ? "Arrival, Orientation & Historic Landmarks"
+      : i === 2
+      ? "Nature, Culture & Iconic Scenery"
+      : i === 3
+      ? "Local Flavors, Hidden Gems & Sunset Views"
+      : `Adventure, Exploration & Experiences (Day ${i})`;
+
+    // Slice 3 to 4 activities per day from pool (rotating if needed)
+    const startIndex = ((i - 1) * 3) % pool.length;
+    const dayActs = [];
+    for (let j = 0; j < 3; j++) {
+      const act = pool[(startIndex + j) % pool.length];
+      dayActs.push({
+        order: j + 1,
+        title: act.title,
+        locationName: act.locationName,
+        startTime: act.startTime,
+        endTime: act.endTime,
+        category: act.category,
+        description: act.description,
+        estimatedCost: act.estimatedCost
+      });
+    }
+
+    days.push({
+      dayNumber: i,
+      title: `Day ${i}: ${dayTheme}`,
+      theme: dayTheme,
+      activities: dayActs
+    });
+  }
+
+  const basePerDayCost = budget === "luxury" ? 25000 : budget === "budget" ? 4500 : 12000;
+  const estimatedTotalCost = basePerDayCost * daysCount * Number(travelersCount || 1);
+
+  return {
+    tripTitle: blueprint ? `${blueprint.title} (${daysCount} Days)` : `${destination} Complete Experience (${daysCount} Days)`,
+    destination: destination,
+    durationDays: daysCount,
+    budgetCategory: budget,
+    travelStyle: travelStyle,
+    travelersCount: Number(travelersCount || 1),
+    currency: "LKR",
+    estimatedTotalCost: `LKR ${estimatedTotalCost.toLocaleString()}`,
+    coverImage: blueprint?.coverImage || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+    summary: `A carefully designed ${daysCount}-day itinerary for ${destination} tuned for ${travelStyle} travel and a ${budget} budget, offering the perfect balance of highlights, leisure, and genuine local culture.`,
+    highlights: blueprint?.highlights || [`Iconic ${destination} Landmarks`, "Authentic Local Cuisine", "Cultural Highlights", "Scenic Viewpoints"],
+    packingChecklist: blueprint?.checklist || [
+      "Comfortable walking footwear",
+      "Sun hat and sunglasses",
+      "Universal power adapter",
+      "Lightweight breathable clothing",
+      "Emergency first aid & personal medication",
+      "Local SIM card or eSIM ready"
+    ],
+    localTips: blueprint?.tips || [
+      `Carry cash in small denominations (LKR 100, 500, 1000) for local shops and tuk-tuks in ${destination}.`,
+      "Stay hydrated throughout daytime excursions and wear high-SPF sunscreen.",
+      "Respect local customs, especially when visiting religious or heritage sites."
+    ],
+    days: days
+  };
+};
+
+/**
+ * Call Gemini API using native fetch
+ */
+const generateWithGemini = async (prompt, apiKey) => {
+  // Use gemini-2.5-flash or gemini-1.5-flash endpoint
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }]
+        }
+      ],
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.7
+      }
+    })
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API responded with status ${response.status}: ${errorText}`);
+  }
+
+  const data = await response.json();
+  const textOutput = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!textOutput) {
+    throw new Error("No content received from Gemini model");
+  }
+
+  return JSON.parse(textOutput);
+};
+
+/**
+ * Main export: generateItinerary
+ */
+exports.generateItinerary = async (params) => {
+  const {
+    destination,
+    duration = 3,
+    budget = "moderate",
+    travelStyle = "balanced",
+    travelersCount = 2,
+    interests = []
+  } = params;
+
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey || apiKey.trim() === "") {
+    console.log("ℹ️ GEMINI_API_KEY is not set. Generating rich curated itinerary via Voyanta Intelligence Engine.");
+    return generateFallbackItinerary(params);
+  }
+
+  const prompt = `
+You are Voyanta's expert AI Travel Concierge. Generate a realistic, comprehensive, high-quality day-by-day travel itinerary for:
+- Destination: ${destination}
+- Duration: ${duration} days
+- Budget Tier: ${budget} (budget, moderate, or luxury)
+- Travel Style: ${travelStyle}
+- Travelers: ${travelersCount}
+- Special Interests: ${interests.length > 0 ? interests.join(", ") : "Top highlights, authentic food, photography, and culture"}
+
+Return ONLY a valid JSON object matching this exact schema:
+{
+  "tripTitle": "string",
+  "destination": "string",
+  "durationDays": number,
+  "budgetCategory": "string",
+  "travelStyle": "string",
+  "travelersCount": number,
+  "currency": "LKR or USD",
+  "estimatedTotalCost": "string formatted e.g. LKR 65,000",
+  "coverImage": "https://images.unsplash.com/... suitable travel photo",
+  "summary": "2-3 sentences overview of the trip experience",
+  "highlights": ["highlight 1", "highlight 2", "highlight 3", "highlight 4"],
+  "packingChecklist": ["item 1", "item 2", "item 3", "item 4", "item 5"],
+  "localTips": ["practical tip 1", "tip 2", "tip 3"],
+  "days": [
+    {
+      "dayNumber": 1,
+      "title": "Day 1 Title",
+      "theme": "Theme description",
+      "activities": [
+        {
+          "order": 1,
+          "title": "Activity name",
+          "locationName": "Precise location/establishment",
+          "startTime": "09:00 AM",
+          "endTime": "11:00 AM",
+          "category": "Sightseeing | Dining | Adventure | Culture | Relaxation",
+          "description": "Engaging description of the activity and what to experience",
+          "estimatedCost": 1500
+        }
+      ]
+    }
+  ]
+}
+Include exactly ${duration} days, with 3 to 4 well-sequenced activities per day with accurate realistic timeframes and costs.
+`;
+
+  try {
+    const aiResult = await generateWithGemini(prompt, apiKey);
+    return aiResult;
+  } catch (err) {
+    console.warn(`⚠️ Gemini API call failed (${err.message}). Seamlessly falling back to Voyanta Curated Engine.`);
+    return generateFallbackItinerary(params);
+  }
+};
