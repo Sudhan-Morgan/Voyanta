@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { tripService } from '../../services/tripService';
 import { useAuth } from '../../context/AuthContext';
+import TripExpensesTab from '../../components/trips/TripExpensesTab';
 import {
   Calendar,
   MapPin,
@@ -327,15 +328,13 @@ export default function TripDetailsPage() {
           </div>
         )}
 
-        {/* BUDGET TAB PLACEHOLDER */}
+        {/* BUDGET & EXPENSES TAB */}
         {activeTab === 'budget' && (
-          <div className="bg-white rounded-3xl border border-dashed border-slate-300 p-12 text-center max-w-lg mx-auto space-y-4">
-            <DollarSign className="w-12 h-12 text-emerald-600 mx-auto" />
-            <h3 className="text-lg font-bold text-slate-900">Budget Tracker</h3>
-            <p className="text-xs text-slate-500">
-              Total Budget: {trip.currency} {trip.budget?.toLocaleString()}. Start logging transport, hotel, and dining expenses.
-            </p>
-          </div>
+          <TripExpensesTab
+            trip={trip}
+            members={members}
+            onExpenseUpdated={fetchTripDetails}
+          />
         )}
 
         {/* MEMBERS TAB PLACEHOLDER */}
