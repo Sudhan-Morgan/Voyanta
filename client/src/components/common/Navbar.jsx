@@ -36,7 +36,7 @@ export default function Navbar() {
             </div>
             <div>
               <span className="text-xl font-black tracking-tight text-slate-900 group-hover:text-indigo-600 transition-colors">
-                Travel<span className="text-indigo-600">Mate</span>
+                Voy<span className="text-indigo-600">anta</span>
               </span>
               <span className="block text-[10px] uppercase font-bold tracking-widest text-slate-400 -mt-1">
                 AI Travel Planner
