@@ -56,7 +56,7 @@ export default function Footer() {
               EE4207 – Web Application Development
             </p>
             <a
-              href="https://github.com/Sudhan-Morgan/travelmate"
+              href="https://github.com/Sudhan-Morgan/Voyanta"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 text-xs text-indigo-400 hover:text-indigo-300 font-medium"
