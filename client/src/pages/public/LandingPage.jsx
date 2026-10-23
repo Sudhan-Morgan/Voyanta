@@ -32,32 +32,32 @@ export default function LandingPage() {
 
   const featuredDestinations = [
     {
-      name: 'Kyoto, Japan',
-      category: 'Culture & Nature',
-      image: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=600&q=80',
+      name: 'Sigiriya Lion Rock',
+      category: 'UNESCO Heritage',
+      image: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=600&q=80',
       rating: '4.9',
-      duration: '5 - 7 Days'
+      duration: '2 - 3 Days'
     },
     {
-      name: 'Santorini, Greece',
-      category: 'Beach & Romantic',
-      image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=600&q=80',
-      rating: '4.8',
-      duration: '4 - 6 Days'
-    },
-    {
-      name: 'Swiss Alps, Switzerland',
-      category: 'Adventure & Mountains',
-      image: 'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&w=600&q=80',
+      name: 'Ella & Nine Arch Bridge',
+      category: 'Hill Country & Tea Trails',
+      image: 'https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=600&q=80',
       rating: '5.0',
-      duration: '7 - 10 Days'
+      duration: '3 - 4 Days'
     },
     {
-      name: 'Bali, Indonesia',
-      category: 'Tropical & Relaxation',
-      image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=600&q=80',
+      name: 'Mirissa Beach & Whale Watching',
+      category: 'Beaches & Ocean',
+      image: 'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=600&q=80',
+      rating: '4.8',
+      duration: '3 - 5 Days'
+    },
+    {
+      name: 'Galle Dutch Fort',
+      category: 'Colonial Fort & Sunset Ramparts',
+      image: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=600&q=80',
       rating: '4.9',
-      duration: '6 - 8 Days'
+      duration: '2 - 3 Days'
     }
   ];
 
@@ -70,7 +70,7 @@ export default function LandingPage() {
             {/* Pill Tag */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-200/60 text-xs font-semibold text-indigo-700 mb-6 shadow-xs">
               <Sparkles className="w-3.5 h-3.5 text-indigo-600 animate-spin" />
-              <span>Next-Gen Travel Planning Platform</span>
+              <span>AI-Powered Travel Planning across Sri Lanka 🇱🇰</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.15]">
@@ -81,7 +81,7 @@ export default function LandingPage() {
             </h1>
 
             <p className="mt-6 text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
-              Bring day-by-day itineraries, interactive Google Maps, split budget tracking, and real-time companion collaboration together in one unified app.
+              Explore the wonder of Sri Lanka with AI-assisted day-by-day itineraries, interactive maps, split budget tracking in LKR, and group coordination in one unified app.
             </p>
 
             {/* CTA Buttons */}
@@ -223,7 +223,7 @@ export default function LandingPage() {
               Ready to create your next adventure?
             </h2>
             <p className="mt-4 text-indigo-200 text-sm sm:text-base leading-relaxed">
-              Create an itinerary in seconds with TravelMate AI, invite your travel crew, and hit the road with zero planning stress.
+              Create an itinerary in seconds with Voyanta AI, invite your travel crew, and hit the road with zero planning stress.
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Link

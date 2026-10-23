@@ -19,19 +19,20 @@ app.use(express.urlencoded({ extended: true }));
 // API Routes
 app.use('/api/auth', require('./src/routes/authRoutes'));
 app.use('/api/trips', require('./src/routes/tripRoutes'));
+app.use('/api/destinations', require('./src/routes/destinationRoutes'));
 
 // Health check route
 app.get('/api/health', (req, res) => {
   res.status(200).json({
     status: 'success',
-    message: 'TravelMate API is running smoothly',
+    message: 'Voyanta API is running smoothly',
     timestamp: new Date().toISOString()
   });
 });
 
 // Root API Welcome route
 app.get('/', (req, res) => {
-  res.send('Welcome to TravelMate API Service');
+  res.send('Welcome to Voyanta API Service');
 });
 
 // 404 handler for unmatched routes
@@ -54,5 +55,5 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
-  console.log(`🚀 TravelMate Server running on http://localhost:${PORT}`);
+  console.log(`🚀 Voyanta Server running on http://localhost:${PORT}`);
 });

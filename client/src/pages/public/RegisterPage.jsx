@@ -61,7 +61,7 @@ export default function RegisterPage() {
             <Compass className="w-7 h-7" />
           </div>
           <h2 className="text-2xl font-bold tracking-tight text-slate-900">
-            Join TravelMate
+            Join Voyanta
           </h2>
           <p className="mt-2 text-sm text-slate-500">
             Create your account to unlock AI-assisted collaborative trip planning

@@ -14,7 +14,7 @@ export default function Footer() {
                 <Compass className="w-4 h-4" />
               </div>
               <span className="text-lg font-bold text-white tracking-tight">
-                Travel<span className="text-indigo-400">Mate</span>
+                Voy<span className="text-indigo-400">anta</span>
               </span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
@@ -56,7 +56,7 @@ export default function Footer() {
               EE4207 – Web Application Development
             </p>
             <a
-              href="https://github.com/Sudhan-Morgan/travelmate"
+              href="https://github.com/Sudhan-Morgan/Voyanta"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 text-xs text-indigo-400 hover:text-indigo-300 font-medium"
@@ -70,7 +70,7 @@ export default function Footer() {
         </div>
 
         <div className="pt-6 border-t border-slate-800 text-xs flex flex-col sm:flex-row justify-between items-center gap-3">
-          <p>© {new Date().getFullYear()} TravelMate. Built for seamless travel planning.</p>
+          <p>© {new Date().getFullYear()} Voyanta. Built for seamless travel planning.</p>
           <p className="flex items-center gap-1">
             Developed with <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500" /> by Sudhan M
           </p>

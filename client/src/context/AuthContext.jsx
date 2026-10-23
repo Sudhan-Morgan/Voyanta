@@ -9,8 +9,8 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     // Check if token and user exist in localStorage
-    const savedUser = localStorage.getItem('travelmate_user');
-    const token = localStorage.getItem('travelmate_token');
+    const savedUser = localStorage.getItem('voyanta_user') || localStorage.getItem('travelmate_user');
+    const token = localStorage.getItem('voyanta_token') || localStorage.getItem('travelmate_token');
 
     if (savedUser && token) {
       try {

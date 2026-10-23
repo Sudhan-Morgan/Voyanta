@@ -10,7 +10,7 @@ const API = axios.create({
 // Request interceptor to attach JWT token to Authorization header
 API.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('travelmate_token');
+    const token = localStorage.getItem('voyanta_token') || localStorage.getItem('travelmate_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -25,6 +25,8 @@ API.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       // Token expired or invalid
+      localStorage.removeItem('voyanta_token');
+      localStorage.removeItem('voyanta_user');
       localStorage.removeItem('travelmate_token');
       localStorage.removeItem('travelmate_user');
     }
