@@ -6,7 +6,7 @@ const User = require('../models/User');
 const generateToken = (id) => {
   return jwt.sign(
     { id },
-    process.env.JWT_SECRET || 'travelmate_super_secret_dev_key_2026',
+    process.env.JWT_SECRET || 'voyanta_super_secret_dev_key_2026',
     { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
   );
 };

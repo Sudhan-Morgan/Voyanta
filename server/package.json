@@ -1,14 +1,14 @@
 {
-  "name": "travelmate-server",
+  "name": "voyanta-server",
   "version": "1.0.0",
-  "description": "Backend API for TravelMate - AI-Powered Collaborative Travel Planning Platform",
+  "description": "Backend API for Voyanta - AI-Powered Collaborative Travel Planning Platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
   "keywords": [
-    "travelmate",
+    "voyanta",
     "express",
     "mongodb",
     "nodejs",

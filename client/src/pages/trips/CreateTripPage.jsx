@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { tripService } from '../../services/tripService';
 import {
   Compass,
@@ -17,16 +17,19 @@ import {
 
 export default function CreateTripPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const prefilledDestination = searchParams.get('destination') || '';
+
   const [formData, setFormData] = useState({
-    title: '',
-    destination: '',
+    title: prefilledDestination ? `Trip to ${prefilledDestination}` : '',
+    destination: prefilledDestination,
     startDate: '',
     endDate: '',
     budget: '',
-    currency: 'USD',
+    currency: 'LKR',
     groupSize: 1,
     interests: [],
     coverImage: ''
@@ -34,21 +37,21 @@ export default function CreateTripPage() {
 
   const availableInterests = [
     'Beach & Coastal',
-    'Mountains & Hiking',
+    'Hill Country & Tea',
     'Historical & Culture',
-    'Food & Culinary',
-    'Adventure & Sports',
-    'Wildlife & Safari',
-    'City Exploration',
-    'Relaxation & Wellness'
+    'Sri Lankan Culinary',
+    'Adventure & Surfing',
+    'Wildlife Safari',
+    'Temple & Heritage',
+    'Scenic Train Journeys'
   ];
 
   const sampleCovers = [
-    'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
-    'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&w=1200&q=80'
+    'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=1200&q=80', // Sigiriya
+    'https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=1200&q=80', // Ella
+    'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=1200&q=80', // Mirissa
+    'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=1200&q=80', // Galle
+    'https://images.unsplash.com/photo-1543731068-7e0f5beff43a?auto=format&fit=crop&w=1200&q=80'  // Nuwara Eliya
   ];
 
   const handleInputChange = (e) => {
@@ -257,11 +260,11 @@ export default function CreateTripPage() {
                   onChange={handleInputChange}
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 focus:border-indigo-500 transition-all"
                 >
+                  <option value="LKR">LKR (Rs. / රු)</option>
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€)</option>
                   <option value="GBP">GBP (£)</option>
                   <option value="INR">INR (₹)</option>
-                  <option value="JPY">JPY (¥)</option>
                 </select>
               </div>
 
