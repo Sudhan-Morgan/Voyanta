@@ -24,4 +24,7 @@ router.route('/:id')
 // Nested routes for trip expenses
 router.use('/:tripId/expenses', require('./expenseRoutes'));
 
+// Nested routes for trip itinerary items
+router.use('/:tripId/itinerary', require('./itineraryRoutes'));
+
 module.exports = router;
