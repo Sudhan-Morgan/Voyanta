@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { tripService } from '../../services/tripService';
 import { useAuth } from '../../context/AuthContext';
 import TripExpensesTab from '../../components/trips/TripExpensesTab';
+import TripItineraryTab from '../../components/trips/TripItineraryTab';
 import {
   Calendar,
   MapPin,
@@ -311,21 +312,13 @@ export default function TripDetailsPage() {
           </div>
         )}
 
-        {/* ITINERARY TAB PLACEHOLDER */}
+        {/* ITINERARY TAB */}
         {activeTab === 'itinerary' && (
-          <div className="bg-white rounded-3xl border border-dashed border-slate-300 p-12 text-center max-w-lg mx-auto space-y-4">
-            <Compass className="w-12 h-12 text-indigo-600 mx-auto" />
-            <h3 className="text-lg font-bold text-slate-900">Itinerary Schedule</h3>
-            <p className="text-xs text-slate-500">
-              Your itinerary schedule for {trip.destination} is ready for activities. Add stops manually or generate an AI day-by-day plan!
-            </p>
-            <Link
-              to="/ai-planner"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold shadow-xs"
-            >
-              <Sparkles className="w-4 h-4" /> Generate AI Itinerary
-            </Link>
-          </div>
+          <TripItineraryTab
+            trip={trip}
+            canEdit={isOwner || members.some(m => (m.userId?._id || m.userId)?.toString() === user?._id?.toString() && m.role !== 'viewer')}
+            onItineraryUpdated={fetchTripDetails}
+          />
         )}
 
         {/* BUDGET & EXPENSES TAB */}
