@@ -268,13 +268,28 @@ const DESTINATION_KNOWLEDGE = {
 };
 
 /**
+ * Currency conversion factors relative to LKR (approximate for realistic scaling)
+ */
+const CURRENCY_CONVERSION = {
+  LKR: 1,
+  USD: 300,
+  INR: 3.6,
+  EUR: 325,
+  GBP: 380
+};
+
+/**
  * Fallback generator when Gemini API key is missing or offline
  */
 const generateFallbackItinerary = (params) => {
   const {
     destination = "Sri Lanka",
     duration = 3,
+    startDate,
+    endDate,
     budget = "moderate",
+    customBudget,
+    currency = "LKR",
     travelStyle = "balanced",
     travelersCount = 2,
     interests = []
@@ -284,9 +299,42 @@ const generateFallbackItinerary = (params) => {
   const matchedData = Object.keys(DESTINATION_KNOWLEDGE).find((k) => destKey.includes(k));
   const blueprint = matchedData ? DESTINATION_KNOWLEDGE[matchedData] : null;
 
-  const daysCount = Math.max(1, Math.min(Number(duration) || 3, 14));
-  const days = [];
+  // 1. Calculate duration and dates
+  let daysCount = Math.max(1, Math.min(Number(duration) || 3, 14));
+  let parsedStartDate = null;
+  let parsedEndDate = null;
 
+  if (startDate) {
+    parsedStartDate = new Date(startDate);
+    if (endDate) {
+      parsedEndDate = new Date(endDate);
+      const diffMs = parsedEndDate.getTime() - parsedStartDate.getTime();
+      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24)) + 1;
+      if (diffDays > 0) {
+        daysCount = Math.max(1, Math.min(diffDays, 14));
+      }
+    } else {
+      parsedEndDate = new Date(parsedStartDate.getTime() + (daysCount - 1) * 24 * 60 * 60 * 1000);
+    }
+  }
+
+  const curr = (currency || "LKR").toUpperCase();
+  const convRate = CURRENCY_CONVERSION[curr] || 1;
+
+  // 2. Budget Calculation & Strict Limiting
+  let targetTotalBudget = 0;
+  const numTravelers = Math.max(1, Number(travelersCount) || 1);
+
+  if (customBudget && Number(customBudget) > 0) {
+    targetTotalBudget = Number(customBudget);
+  } else {
+    // Sensible base cost per traveler per day in selected currency
+    const basePerDayLKR = budget === "luxury" ? 25000 : budget === "budget" ? 4500 : 12000;
+    const basePerDayInCurr = Math.round(basePerDayLKR / convRate);
+    targetTotalBudget = basePerDayInCurr * daysCount * numTravelers;
+  }
+
+  // Pool of candidate activities
   const defaultActivities = [
     {
       title: `Morning Highlights Tour of ${destination}`,
@@ -294,17 +342,17 @@ const generateFallbackItinerary = (params) => {
       startTime: "09:00 AM",
       endTime: "11:30 AM",
       category: "Sightseeing",
-      description: `Discover the top historical and scenic hotspots in ${destination} with an experienced local guide.`,
-      estimatedCost: budget === "luxury" ? 6000 : budget === "budget" ? 800 : 2500
+      description: `Discover top scenic hotspots and iconic attractions in ${destination} with an experienced local guide.`,
+      estimatedCost: 1500
     },
     {
-      title: "Local Culinary Exploration & Lunch",
+      title: "Local Culinary Tasting & Lunch",
       locationName: `${destination} Heritage Eatery`,
       startTime: "12:30 PM",
       endTime: "02:00 PM",
       category: "Food & Dining",
-      description: "Taste traditional specialty dishes, fresh tropical fruits, and signature regional desserts.",
-      estimatedCost: budget === "luxury" ? 8000 : budget === "budget" ? 1200 : 3500
+      description: "Sample traditional specialty dishes, fresh tropical fruits, and signature regional desserts.",
+      estimatedCost: 2000
     },
     {
       title: "Scenic Landscape & Photography Excursion",
@@ -313,7 +361,7 @@ const generateFallbackItinerary = (params) => {
       endTime: "05:30 PM",
       category: "Nature & Leisure",
       description: "Capture golden hour panoramic shots and unwind surrounded by picturesque views.",
-      estimatedCost: budget === "luxury" ? 4000 : 500
+      estimatedCost: 500
     },
     {
       title: "Sunset Evening Relaxation & Dinner",
@@ -322,11 +370,15 @@ const generateFallbackItinerary = (params) => {
       endTime: "09:30 PM",
       category: "Dining & Nightlife",
       description: "Relax at a top-rated dining spot and enjoy refreshing beverages and acoustic tunes.",
-      estimatedCost: budget === "luxury" ? 9000 : budget === "budget" ? 1500 : 4000
+      estimatedCost: 2500
     }
   ];
 
   const pool = blueprint ? blueprint.activitiesPool : defaultActivities;
+
+  // First pass: assemble raw days and activities
+  const rawDays = [];
+  let totalRawCost = 0;
 
   for (let i = 1; i <= daysCount; i++) {
     const dayTheme = i === 1
@@ -337,11 +389,29 @@ const generateFallbackItinerary = (params) => {
       ? "Local Flavors, Hidden Gems & Sunset Views"
       : `Adventure, Exploration & Experiences (Day ${i})`;
 
-    // Slice 3 to 4 activities per day from pool (rotating if needed)
     const startIndex = ((i - 1) * 3) % pool.length;
     const dayActs = [];
+
+    // Formatted calendar date if startDate exists
+    let formattedDate = null;
+    let isoDate = null;
+    if (parsedStartDate) {
+      const currentDayDate = new Date(parsedStartDate.getTime() + (i - 1) * 24 * 60 * 60 * 1000);
+      isoDate = currentDayDate.toISOString().split('T')[0];
+      formattedDate = currentDayDate.toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
+    }
+
     for (let j = 0; j < 3; j++) {
       const act = pool[(startIndex + j) % pool.length];
+      // Convert blueprint LKR cost to user's currency
+      const costInCurr = Math.round((act.estimatedCost || 0) / convRate);
+      totalRawCost += costInCurr;
+
       dayActs.push({
         order: j + 1,
         title: act.title,
@@ -350,32 +420,66 @@ const generateFallbackItinerary = (params) => {
         endTime: act.endTime,
         category: act.category,
         description: act.description,
-        estimatedCost: act.estimatedCost
+        estimatedCost: costInCurr
       });
     }
 
-    days.push({
+    rawDays.push({
       dayNumber: i,
-      title: `Day ${i}: ${dayTheme}`,
+      date: isoDate,
+      formattedDate: formattedDate,
+      title: formattedDate ? `Day ${i} (${formattedDate}): ${dayTheme}` : `Day ${i}: ${dayTheme}`,
       theme: dayTheme,
       activities: dayActs
     });
   }
 
-  const basePerDayCost = budget === "luxury" ? 25000 : budget === "budget" ? 4500 : 12000;
-  const estimatedTotalCost = basePerDayCost * daysCount * Number(travelersCount || 1);
+  // 3. STRICT BUDGET SCALING:
+  // Ensure the sum of all activities NEVER exceeds targetTotalBudget
+  let actualSumCost = 0;
+  const maxActivityBudget = Math.max(1, targetTotalBudget * 0.85); // 15% safety buffer for incidentals
+
+  if (totalRawCost > maxActivityBudget && totalRawCost > 0) {
+    const scaleFactor = maxActivityBudget / totalRawCost;
+    rawDays.forEach((day) => {
+      day.activities.forEach((act) => {
+        if (act.estimatedCost > 0) {
+          let scaled = act.estimatedCost * scaleFactor;
+          if (curr === 'LKR' || curr === 'INR') {
+            scaled = Math.max(50, Math.round(scaled / 50) * 50);
+          } else {
+            scaled = Math.max(1, Math.round(scaled));
+          }
+          act.estimatedCost = scaled;
+        }
+        actualSumCost += act.estimatedCost;
+      });
+    });
+  } else {
+    rawDays.forEach((day) => {
+      day.activities.forEach((act) => {
+        actualSumCost += act.estimatedCost;
+      });
+    });
+  }
+
+  // Guarantee final total never exceeds target budget
+  const finalTotalCost = Math.min(actualSumCost, targetTotalBudget);
 
   return {
     tripTitle: blueprint ? `${blueprint.title} (${daysCount} Days)` : `${destination} Complete Experience (${daysCount} Days)`,
     destination: destination,
     durationDays: daysCount,
+    startDate: parsedStartDate ? parsedStartDate.toISOString().split('T')[0] : null,
+    endDate: parsedEndDate ? parsedEndDate.toISOString().split('T')[0] : null,
     budgetCategory: budget,
+    customBudget: targetTotalBudget,
     travelStyle: travelStyle,
-    travelersCount: Number(travelersCount || 1),
-    currency: "LKR",
-    estimatedTotalCost: `LKR ${estimatedTotalCost.toLocaleString()}`,
+    travelersCount: numTravelers,
+    currency: curr,
+    estimatedTotalCost: `${curr} ${finalTotalCost.toLocaleString()}`,
     coverImage: blueprint?.coverImage || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
-    summary: `A carefully designed ${daysCount}-day itinerary for ${destination} tuned for ${travelStyle} travel and a ${budget} budget, offering the perfect balance of highlights, leisure, and genuine local culture.`,
+    summary: `A carefully designed ${daysCount}-day itinerary for ${destination} tuned for ${travelStyle} travel and staying strictly within your ${curr} ${targetTotalBudget.toLocaleString()} budget.`,
     highlights: blueprint?.highlights || [`Iconic ${destination} Landmarks`, "Authentic Local Cuisine", "Cultural Highlights", "Scenic Viewpoints"],
     packingChecklist: blueprint?.checklist || [
       "Comfortable walking footwear",
@@ -386,11 +490,11 @@ const generateFallbackItinerary = (params) => {
       "Local SIM card or eSIM ready"
     ],
     localTips: blueprint?.tips || [
-      `Carry cash in small denominations (LKR 100, 500, 1000) for local shops and tuk-tuks in ${destination}.`,
+      `Carry cash in small denominations (${curr}) for local shops and transit in ${destination}.`,
       "Stay hydrated throughout daytime excursions and wear high-SPF sunscreen.",
       "Respect local customs, especially when visiting religious or heritage sites."
     ],
-    days: days
+    days: rawDays
   };
 };
 
@@ -398,7 +502,6 @@ const generateFallbackItinerary = (params) => {
  * Call Gemini API using native fetch
  */
 const generateWithGemini = async (prompt, apiKey) => {
-  // Use gemini-2.5-flash or gemini-1.5-flash endpoint
   const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
   const response = await fetch(url, {
@@ -415,7 +518,7 @@ const generateWithGemini = async (prompt, apiKey) => {
       ],
       generationConfig: {
         responseMimeType: "application/json",
-        temperature: 0.7
+        temperature: 0.6
       }
     })
   });
@@ -441,7 +544,11 @@ exports.generateItinerary = async (params) => {
   const {
     destination,
     duration = 3,
+    startDate,
+    endDate,
     budget = "moderate",
+    customBudget,
+    currency = "LKR",
     travelStyle = "balanced",
     travelersCount = 2,
     interests = []
@@ -449,30 +556,43 @@ exports.generateItinerary = async (params) => {
 
   const apiKey = process.env.GEMINI_API_KEY;
 
-  if (!apiKey || apiKey.trim() === "") {
-    console.log("ℹ️ GEMINI_API_KEY is not set. Generating rich curated itinerary via Voyanta Intelligence Engine.");
+  if (!apiKey || apiKey.trim() === "" || apiKey === "your_gemini_or_llm_api_key_here") {
+    console.log("ℹ️ GEMINI_API_KEY not configured. Generating strict budget-compliant itinerary via Voyanta Curated Engine.");
     return generateFallbackItinerary(params);
   }
 
+  const curr = (currency || "LKR").toUpperCase();
   const prompt = `
 You are Voyanta's expert AI Travel Concierge. Generate a realistic, comprehensive, high-quality day-by-day travel itinerary for:
 - Destination: ${destination}
-- Duration: ${duration} days
-- Budget Tier: ${budget} (budget, moderate, or luxury)
+- Duration: ${duration} days ${startDate ? `(From ${startDate} to ${endDate || startDate})` : ''}
+- STRICT MAXIMUM BUDGET: ${customBudget ? `${customBudget} ${curr}` : `${budget} tier in ${curr}`}
+- Currency: ${curr}
 - Travel Style: ${travelStyle}
 - Travelers: ${travelersCount}
 - Special Interests: ${interests.length > 0 ? interests.join(", ") : "Top highlights, authentic food, photography, and culture"}
+
+CRITICAL BUDGET CONSTRAINTS:
+1. The user's total budget is EXACTLY ${customBudget || 'moderate'} ${curr}.
+2. The SUM of all activity estimatedCost across all ${duration} days MUST NOT EXCEED ${customBudget || 'moderate'} ${curr}.
+3. Every activity's estimatedCost must be a realistic number in ${curr}.
+
+CRITICAL CALENDAR CONSTRAINTS:
+${startDate ? `1. The trip starts exactly on ${startDate} and ends on ${endDate || startDate}. Each day must include its valid date "YYYY-MM-DD".` : ''}
 
 Return ONLY a valid JSON object matching this exact schema:
 {
   "tripTitle": "string",
   "destination": "string",
   "durationDays": number,
+  "startDate": "${startDate || ''}",
+  "endDate": "${endDate || ''}",
   "budgetCategory": "string",
+  "customBudget": ${Number(customBudget) || 0},
   "travelStyle": "string",
   "travelersCount": number,
-  "currency": "LKR or USD",
-  "estimatedTotalCost": "string formatted e.g. LKR 65,000",
+  "currency": "${curr}",
+  "estimatedTotalCost": "${curr} formatted e.g. ${curr} 15,000",
   "coverImage": "https://images.unsplash.com/... suitable travel photo",
   "summary": "2-3 sentences overview of the trip experience",
   "highlights": ["highlight 1", "highlight 2", "highlight 3", "highlight 4"],
@@ -481,6 +601,7 @@ Return ONLY a valid JSON object matching this exact schema:
   "days": [
     {
       "dayNumber": 1,
+      "date": "${startDate || ''}",
       "title": "Day 1 Title",
       "theme": "Theme description",
       "activities": [
@@ -490,15 +611,14 @@ Return ONLY a valid JSON object matching this exact schema:
           "locationName": "Precise location/establishment",
           "startTime": "09:00 AM",
           "endTime": "11:00 AM",
-          "category": "Sightseeing | Dining | Adventure | Culture | Relaxation",
+          "category": "Sightseeing | Food & Dining | Adventure | Culture | Relaxation",
           "description": "Engaging description of the activity and what to experience",
-          "estimatedCost": 1500
+          "estimatedCost": 500
         }
       ]
     }
   ]
 }
-Include exactly ${duration} days, with 3 to 4 well-sequenced activities per day with accurate realistic timeframes and costs.
 `;
 
   try {
@@ -509,3 +629,4 @@ Include exactly ${duration} days, with 3 to 4 well-sequenced activities per day 
     return generateFallbackItinerary(params);
   }
 };
+
