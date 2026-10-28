@@ -148,7 +148,7 @@ exports.getTripById = async (req, res) => {
 
     // Also fetch members, itinerary count, and expenses summary
     const members = await TripMember.find({ tripId: trip._id })
-      .populate('userId', 'name email profileImage')
+      .populate('userId', 'name email profileImage userNumber phoneNumber')
       .sort({ createdAt: 1 });
 
     const itineraryCount = await ItineraryItem.countDocuments({ tripId: trip._id });
@@ -280,3 +280,261 @@ exports.deleteTrip = async (req, res) => {
     });
   }
 };
+
+// @desc    Get all pending trip invitations for current user
+// @route   GET /api/trips/invitations
+// @access  Private
+exports.getTripInvitations = async (req, res) => {
+  try {
+    const invitations = await TripMember.find({
+      userId: req.user._id,
+      invitationStatus: 'pending'
+    })
+      .populate({
+        path: 'tripId',
+        populate: { path: 'ownerId', select: 'name email profileImage userNumber' }
+      })
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      count: invitations.length,
+      data: invitations.filter((inv) => inv.tripId)
+    });
+  } catch (error) {
+    console.error('Get Trip Invitations Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to fetch trip invitations'
+    });
+  }
+};
+
+// @desc    Invite a friend or user to a trip
+// @route   POST /api/trips/:id/invite
+// @access  Private
+exports.inviteFriendToTrip = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { friendId, userNumber, email, role } = req.body;
+
+    const trip = await Trip.findById(id);
+    if (!trip) {
+      return res.status(404).json({ success: false, message: 'Trip not found' });
+    }
+
+    // Only owner or existing accepted member with role 'owner' or 'editor' can invite
+    const isOwner = trip.ownerId.toString() === req.user._id.toString();
+    const userMembership = await TripMember.findOne({
+      tripId: trip._id,
+      userId: req.user._id,
+      invitationStatus: 'accepted'
+    });
+
+    if (!isOwner && (!userMembership || userMembership.role === 'viewer')) {
+      return res.status(403).json({
+        success: false,
+        message: 'You do not have permission to invite members to this trip'
+      });
+    }
+
+    const User = require('../models/User');
+    let targetUser = null;
+    if (friendId) {
+      targetUser = await User.findById(friendId);
+    } else if (userNumber) {
+      const cleanNum = parseInt(userNumber.toString().replace(/[^0-9]/g, ''), 10);
+      targetUser = await User.findOne({ userNumber: cleanNum });
+    } else if (email) {
+      targetUser = await User.findOne({ email: email.toLowerCase().trim() });
+    }
+
+    if (!targetUser) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found. Please verify the 6-digit User ID or email.'
+      });
+    }
+
+    if (targetUser._id.toString() === trip.ownerId.toString()) {
+      return res.status(400).json({
+        success: false,
+        message: 'This user is already the owner of the trip.'
+      });
+    }
+
+    // Check if already invited or a member
+    let existingMember = await TripMember.findOne({
+      tripId: trip._id,
+      userId: targetUser._id
+    });
+
+    if (existingMember) {
+      if (existingMember.invitationStatus === 'accepted') {
+        return res.status(400).json({
+          success: false,
+          message: `${targetUser.name} is already a member of this trip.`
+        });
+      }
+      if (existingMember.invitationStatus === 'pending') {
+        return res.status(400).json({
+          success: false,
+          message: `An invitation has already been sent to ${targetUser.name}.`
+        });
+      }
+      // If declined previously, reactivate to pending
+      existingMember.invitationStatus = 'pending';
+      existingMember.role = role || 'editor';
+      await existingMember.save();
+    } else {
+      existingMember = await TripMember.create({
+        tripId: trip._id,
+        userId: targetUser._id,
+        role: role || 'editor',
+        invitationStatus: 'pending'
+      });
+    }
+
+    // Update groupSize if needed
+    const acceptedCount = await TripMember.countDocuments({
+      tripId: trip._id,
+      invitationStatus: { $in: ['accepted', 'pending'] }
+    });
+    if (trip.groupSize < acceptedCount) {
+      trip.groupSize = acceptedCount;
+      await trip.save();
+    }
+
+    // Post announcement in trip discussion forum
+    try {
+      const TripMessage = require('../models/TripMessage');
+      await TripMessage.create({
+        tripId: trip._id,
+        senderId: req.user._id,
+        message: `📢 Sent a travel crew invitation to ${targetUser.name} (User ID: #${targetUser.userNumber || 'N/A'})!`,
+        category: 'general'
+      });
+    } catch (msgErr) {
+      // non-fatal
+    }
+
+    const populatedMember = await TripMember.findById(existingMember._id).populate(
+      'userId',
+      'name email profileImage userNumber phoneNumber'
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `Invitation successfully sent to ${targetUser.name}!`,
+      member: populatedMember
+    });
+  } catch (error) {
+    console.error('Invite Friend To Trip Error:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to send trip invitation'
+    });
+  }
+};
+
+// @desc    Respond to incoming trip invitation (accept or decline)
+// @route   PUT /api/trips/:id/invitation/respond
+// @access  Private
+exports.respondTripInvitation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body; // 'accept' or 'decline'
+
+    const membership = await TripMember.findOne({
+      tripId: id,
+      userId: req.user._id
+    }).populate('tripId', 'title destination');
+
+    if (!membership) {
+      return res.status(404).json({
+        success: false,
+        message: 'Trip invitation not found'
+      });
+    }
+
+    if (action === 'accept') {
+      membership.invitationStatus = 'accepted';
+      membership.joinedAt = new Date();
+      await membership.save();
+
+      // Post welcome message in trip discussion forum
+      try {
+        const TripMessage = require('../models/TripMessage');
+        await TripMessage.create({
+          tripId: id,
+          senderId: req.user._id,
+          message: `🎉 Hey travel crew! I just accepted the invite to join "${membership.tripId?.title || 'this trip'}". Excited to travel and plan together!`,
+          category: 'general'
+        });
+      } catch (e) {}
+
+      return res.status(200).json({
+        success: true,
+        message: `You have joined "${membership.tripId?.title || 'the trip'}"!`,
+        membership
+      });
+    } else {
+      membership.invitationStatus = 'declined';
+      await membership.save();
+
+      return res.status(200).json({
+        success: true,
+        message: 'Trip invitation declined.',
+        membership
+      });
+    }
+  } catch (error) {
+    console.error('Respond Trip Invitation Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process trip invitation'
+    });
+  }
+};
+
+// @desc    Remove a member from a trip
+// @route   DELETE /api/trips/:id/members/:memberId
+// @access  Private
+exports.removeTripMember = async (req, res) => {
+  try {
+    const { id, memberId } = req.params;
+    const trip = await Trip.findById(id);
+    if (!trip) {
+      return res.status(404).json({ success: false, message: 'Trip not found' });
+    }
+
+    const isOwner = trip.ownerId.toString() === req.user._id.toString();
+    const targetMember = await TripMember.findById(memberId);
+    if (!targetMember) {
+      return res.status(404).json({ success: false, message: 'Member not found' });
+    }
+
+    // Only owner or the member themselves (leaving) can delete
+    const isSelf = targetMember.userId?.toString() === req.user._id.toString();
+    if (!isOwner && !isSelf) {
+      return res.status(403).json({
+        success: false,
+        message: 'Not authorized to remove this member'
+      });
+    }
+
+    await targetMember.deleteOne();
+
+    res.status(200).json({
+      success: true,
+      message: isSelf ? 'You have left the trip' : 'Member removed from trip'
+    });
+  } catch (error) {
+    console.error('Remove Trip Member Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to remove member'
+    });
+  }
+};
+

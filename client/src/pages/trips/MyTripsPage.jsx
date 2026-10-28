@@ -13,25 +13,52 @@ import {
   Trash2,
   ExternalLink,
   Loader2,
-  Sparkles
+  Sparkles,
+  UserPlus,
+  CheckCircle2,
+  X
 } from 'lucide-react';
 
 export default function MyTripsPage() {
   const [trips, setTrips] = useState([]);
+  const [invitations, setInvitations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [deletingId, setDeletingId] = useState(null);
+  const [respondingId, setRespondingId] = useState(null);
 
   const fetchTrips = async () => {
     try {
       setLoading(true);
       const data = await tripService.getAllTrips();
       setTrips(data.trips || []);
+
+      // Fetch pending invitations
+      try {
+        const invRes = await tripService.getTripInvitations();
+        if (invRes?.data) {
+          setInvitations(invRes.data);
+        }
+      } catch (invErr) {
+        console.warn('Failed to fetch invitations:', invErr);
+      }
     } catch (err) {
       console.error('Error fetching trips:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleRespondInvitation = async (tripId, action) => {
+    try {
+      setRespondingId(tripId);
+      await tripService.respondTripInvitation(tripId, action);
+      await fetchTrips();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to process invitation');
+    } finally {
+      setRespondingId(null);
     }
   };
 
@@ -106,6 +133,83 @@ export default function MyTripsPage() {
           Plan New Trip
         </Link>
       </div>
+
+      {/* PENDING TRIP INVITATIONS BANNER */}
+      {invitations.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-amber-700">
+            <UserPlus className="w-4 h-4" />
+            <span>Trip Invitations ({invitations.length})</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {invitations.map((inv) => {
+              const tripItem = inv.tripId;
+              if (!tripItem) return null;
+              const isResponding = respondingId === tripItem._id;
+
+              return (
+                <div
+                  key={inv._id}
+                  className="relative rounded-2xl bg-gradient-to-r from-indigo-900 to-purple-900 text-white p-5 shadow-lg flex flex-col justify-between gap-4 overflow-hidden border border-indigo-400/30"
+                >
+                  <div className="space-y-1.5">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[11px] font-bold">
+                      <Sparkles className="w-3 h-3" />
+                      <span>Travel Crew Invitation</span>
+                    </div>
+
+                    <h3 className="text-base font-bold text-white tracking-tight">
+                      {tripItem.title}
+                    </h3>
+
+                    <div className="flex items-center gap-3 text-xs text-indigo-200">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3.5 h-3.5 text-indigo-400" />
+                        {tripItem.destination}
+                      </span>
+                      <span>•</span>
+                      <span>
+                        Host: {tripItem.ownerId?.name || 'Friend'}
+                        {tripItem.ownerId?.userNumber && (
+                          <span className="ml-1 text-[10px] font-mono font-bold bg-white/20 px-1.5 py-0.2 rounded">
+                            #{tripItem.ownerId.userNumber}
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+                    <button
+                      onClick={() => handleRespondInvitation(tripItem._id, 'accept')}
+                      disabled={isResponding}
+                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-60"
+                    >
+                      {isResponding ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <>
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Accept & Join Crew</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      onClick={() => handleRespondInvitation(tripItem._id, 'decline')}
+                      disabled={isResponding}
+                      className="py-2 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-white/80 hover:text-white font-semibold text-xs transition-all cursor-pointer"
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Filters & Search */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">

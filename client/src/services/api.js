@@ -11,7 +11,7 @@ const API = axios.create({
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('voyanta_token') || localStorage.getItem('travelmate_token');
-    if (token) {
+    if (token && token !== 'undefined' && token !== 'null') {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -29,9 +29,14 @@ API.interceptors.response.use(
       localStorage.removeItem('voyanta_user');
       localStorage.removeItem('travelmate_token');
       localStorage.removeItem('travelmate_user');
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('auth:unauthorized'));
+      }
     }
     return Promise.reject(error);
   }
 );
 
 export default API;
+

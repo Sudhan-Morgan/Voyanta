@@ -8,7 +8,18 @@ const ItineraryItem = require('../models/ItineraryItem');
 // @access  Public
 exports.generateItinerary = async (req, res) => {
   try {
-    const { destination, duration, budget, travelStyle, travelersCount, interests } = req.body;
+    const {
+      destination,
+      duration,
+      startDate,
+      endDate,
+      budget,
+      customBudget,
+      currency,
+      travelStyle,
+      travelersCount,
+      interests
+    } = req.body;
 
     if (!destination || destination.trim() === '') {
       return res.status(400).json({
@@ -20,7 +31,11 @@ exports.generateItinerary = async (req, res) => {
     const itinerary = await aiService.generateItinerary({
       destination: destination.trim(),
       duration: Number(duration) || 3,
+      startDate: startDate || null,
+      endDate: endDate || null,
       budget: budget || 'moderate',
+      customBudget: customBudget ? Number(customBudget) : null,
+      currency: currency || 'LKR',
       travelStyle: travelStyle || 'balanced',
       travelersCount: Number(travelersCount) || 2,
       interests: Array.isArray(interests) ? interests : []
@@ -45,7 +60,7 @@ exports.generateItinerary = async (req, res) => {
 // @access  Private
 exports.saveItineraryAsTrip = async (req, res) => {
   try {
-    const { itinerary, startDate, endDate } = req.body;
+    const { itinerary, startDate, endDate, customBudget, currency, tripId } = req.body;
 
     if (!itinerary || !itinerary.destination) {
       return res.status(400).json({
@@ -55,44 +70,75 @@ exports.saveItineraryAsTrip = async (req, res) => {
     }
 
     const durationDays = itinerary.durationDays || itinerary.days?.length || 3;
-    const tripStart = startDate ? new Date(startDate) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-    const tripEnd = endDate
-      ? new Date(endDate)
+    
+    // Priority: Explicit startDate passed > itinerary.startDate > default +7 days
+    const chosenStart = startDate || itinerary.startDate;
+    const chosenEnd = endDate || itinerary.endDate;
+
+    const tripStart = chosenStart ? new Date(chosenStart) : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const tripEnd = chosenEnd
+      ? new Date(chosenEnd)
       : new Date(tripStart.getTime() + (durationDays - 1) * 24 * 60 * 60 * 1000);
 
-    // Parse budget estimate into numeric value if possible
+    // Determine exact budget
     let numericBudget = 50000;
-    if (itinerary.estimatedTotalCost) {
+    if (customBudget && Number(customBudget) > 0) {
+      numericBudget = Number(customBudget);
+    } else if (itinerary.customBudget && Number(itinerary.customBudget) > 0) {
+      numericBudget = Number(itinerary.customBudget);
+    } else if (itinerary.estimatedTotalCost) {
       const match = itinerary.estimatedTotalCost.replace(/,/g, '').match(/\d+/);
       if (match) numericBudget = Number(match[0]);
     }
 
-    // 1. Create the Trip
-    const newTrip = await Trip.create({
-      ownerId: req.user.id,
-      title: itinerary.tripTitle || `${itinerary.destination} Adventure`,
-      destination: itinerary.destination,
-      startDate: tripStart,
-      endDate: tripEnd,
-      budget: numericBudget,
-      currency: itinerary.currency || 'LKR',
-      groupSize: itinerary.travelersCount || 1,
-      interests: itinerary.highlights || [],
-      coverImage: itinerary.coverImage || 'https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=1200&q=80',
-      status: 'planning',
-      isPublic: false
-    });
+    const chosenCurrency = currency || itinerary.currency || 'LKR';
 
-    // 2. Add owner to TripMembers
-    await TripMember.create({
-      tripId: newTrip._id,
-      userId: req.user.id,
-      role: 'owner',
-      invitationStatus: 'accepted',
-      joinedAt: new Date()
-    });
+    let targetTrip;
 
-    // 3. Populate ItineraryItems from days
+    // If tripId is passed, update that existing trip
+    if (tripId) {
+      targetTrip = await Trip.findOne({ _id: tripId, ownerId: req.user.id });
+      if (targetTrip) {
+        targetTrip.startDate = tripStart;
+        targetTrip.endDate = tripEnd;
+        targetTrip.budget = numericBudget;
+        targetTrip.currency = chosenCurrency;
+        if (itinerary.coverImage) targetTrip.coverImage = itinerary.coverImage;
+        await targetTrip.save();
+
+        // Clear existing itinerary items for this trip before inserting new AI items
+        await ItineraryItem.deleteMany({ tripId: targetTrip._id });
+      }
+    }
+
+    // Otherwise, create a brand new Trip
+    if (!targetTrip) {
+      targetTrip = await Trip.create({
+        ownerId: req.user.id,
+        title: itinerary.tripTitle || `${itinerary.destination} Adventure`,
+        destination: itinerary.destination,
+        startDate: tripStart,
+        endDate: tripEnd,
+        budget: numericBudget,
+        currency: chosenCurrency,
+        groupSize: itinerary.travelersCount || 1,
+        interests: itinerary.highlights || [],
+        coverImage: itinerary.coverImage || 'https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=1200&q=80',
+        status: 'planning',
+        isPublic: false
+      });
+
+      // Add owner to TripMembers
+      await TripMember.create({
+        tripId: targetTrip._id,
+        userId: req.user.id,
+        role: 'owner',
+        invitationStatus: 'accepted',
+        joinedAt: new Date()
+      });
+    }
+
+    // Populate ItineraryItems from days
     if (Array.isArray(itinerary.days)) {
       const itemsToInsert = [];
 
@@ -100,7 +146,7 @@ exports.saveItineraryAsTrip = async (req, res) => {
         if (Array.isArray(day.activities)) {
           day.activities.forEach((act, idx) => {
             itemsToInsert.push({
-              tripId: newTrip._id,
+              tripId: targetTrip._id,
               dayNumber: day.dayNumber || 1,
               title: act.title,
               description: act.description || '',
@@ -123,7 +169,7 @@ exports.saveItineraryAsTrip = async (req, res) => {
     return res.status(201).json({
       success: true,
       message: 'Itinerary successfully saved to your Trips!',
-      trip: newTrip
+      trip: targetTrip
     });
   } catch (error) {
     console.error('Error saving AI itinerary as trip:', error);
@@ -134,3 +180,4 @@ exports.saveItineraryAsTrip = async (req, res) => {
     });
   }
 };
+

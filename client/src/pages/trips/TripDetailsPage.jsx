@@ -4,6 +4,10 @@ import { tripService } from '../../services/tripService';
 import { useAuth } from '../../context/AuthContext';
 import TripExpensesTab from '../../components/trips/TripExpensesTab';
 import TripItineraryTab from '../../components/trips/TripItineraryTab';
+import TripRouteMap from '../../components/trips/TripRouteMap';
+import TripForumTab from '../../components/trips/TripForumTab';
+import TripMembersTab from '../../components/trips/TripMembersTab';
+import { itineraryService } from '../../services/itineraryService';
 import {
   Calendar,
   MapPin,
@@ -19,7 +23,10 @@ import {
   CheckCircle2,
   Share2,
   Loader2,
-  AlertCircle
+  AlertCircle,
+  Route,
+  MessageSquare,
+  UserPlus
 } from 'lucide-react';
 
 export default function TripDetailsPage() {
@@ -33,6 +40,8 @@ export default function TripDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('overview');
+  const [itineraryItems, setItineraryItems] = useState([]);
+  const [selectedRouteDay, setSelectedRouteDay] = useState('all');
 
   const fetchTripDetails = async () => {
     try {
@@ -41,6 +50,16 @@ export default function TripDetailsPage() {
       setTrip(data.trip);
       setMembers(data.members || []);
       setStats(data.stats || {});
+
+      // Fetch itinerary items for route map
+      try {
+        const itinRes = await itineraryService.getTripItinerary(id);
+        if (itinRes?.success && itinRes.data?.items) {
+          setItineraryItems(itinRes.data.items);
+        }
+      } catch (itinErr) {
+        console.warn('Itinerary items fetch error for map:', itinErr);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load trip details');
     } finally {
@@ -182,17 +201,18 @@ export default function TripDetailsPage() {
           {[
             { id: 'overview', label: 'Trip Overview' },
             { id: 'itinerary', label: `Itinerary (${stats?.itineraryCount || 0})` },
+            { id: 'route-map', label: 'Route & Map' },
+            { id: 'forum', label: 'Discussion Forum' },
             { id: 'budget', label: 'Budget & Expenses' },
             { id: 'members', label: `Travel Crew (${members.length})` }
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-4 text-xs font-bold uppercase tracking-wider transition-all border-b-2 whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'border-indigo-600 text-indigo-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-900'
-              }`}
+              className={`py-4 text-xs font-bold uppercase tracking-wider transition-all border-b-2 whitespace-nowrap ${activeTab === tab.id
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-900'
+                }`}
             >
               {tab.label}
             </button>
@@ -321,6 +341,81 @@ export default function TripDetailsPage() {
           />
         )}
 
+        {/* ROUTE & MAP TAB */}
+        {activeTab === 'route-map' && (
+          <div className="space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-3xl border border-slate-200/80 shadow-xs">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600">
+                  <Route className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900">Itinerary Route Map</h4>
+                  <p className="text-xs text-slate-500">Filter road directions by specific day or view all trip stops</p>
+                </div>
+              </div>
+
+              {/* Day Filter Pills */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+                <button
+                  onClick={() => setSelectedRouteDay('all')}
+                  className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${selectedRouteDay === 'all'
+                    ? 'bg-indigo-600 text-white shadow-xs'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                >
+                  All Days ({itineraryItems.length} stops)
+                </button>
+                {Array.from(new Set(itineraryItems.map((item) => item.dayNumber)))
+                  .sort((a, b) => a - b)
+                  .map((dayNum) => (
+                    <button
+                      key={dayNum}
+                      onClick={() => setSelectedRouteDay(dayNum)}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${selectedRouteDay === dayNum
+                        ? 'bg-indigo-600 text-white shadow-xs'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                        }`}
+                    >
+                      Day {dayNum}
+                    </button>
+                  ))}
+              </div>
+            </div>
+
+            {(() => {
+              const filteredItems = selectedRouteDay === 'all'
+                ? itineraryItems
+                : itineraryItems.filter((item) => item.dayNumber === selectedRouteDay);
+
+              const stops = filteredItems
+                .map((item) => item.locationName || item.title)
+                .filter(Boolean);
+
+              const startPlace = stops[0] || 'Colombo';
+              const endPlace = stops.length > 1 ? stops[stops.length - 1] : trip.destination || 'Galle';
+              const middleStops = stops.length > 2 ? stops.slice(1, -1) : [];
+
+              return (
+                <TripRouteMap
+                  key={`${selectedRouteDay}-${stops.join('-')}`}
+                  tripTitle={`${trip.title} — ${selectedRouteDay === 'all' ? 'All Stops' : `Day ${selectedRouteDay}`}`}
+                  initialOrigin={startPlace}
+                  initialDestination={endPlace}
+                  initialWaypoints={middleStops}
+                  height="560px"
+                  canEdit={true}
+                />
+              );
+            })()}
+          </div>
+        )}
+
+        {/* DISCUSSION FORUM TAB */}
+        {activeTab === 'forum' && (
+          <TripForumTab trip={trip} members={members} />
+        )}
+
         {/* BUDGET & EXPENSES TAB */}
         {activeTab === 'budget' && (
           <TripExpensesTab
@@ -330,31 +425,13 @@ export default function TripDetailsPage() {
           />
         )}
 
-        {/* MEMBERS TAB PLACEHOLDER */}
+        {/* MEMBERS / TRAVEL CREW TAB */}
         {activeTab === 'members' && (
-          <div className="bg-white rounded-3xl border border-slate-200/80 p-8 max-w-2xl mx-auto space-y-6">
-            <h3 className="text-base font-bold text-slate-900">Trip Members & Permissions</h3>
-            <div className="divide-y divide-slate-100">
-              {members.map((member) => (
-                <div key={member._id} className="py-3 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={member.userId?.profileImage || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
-                      alt={member.userId?.name}
-                      className="w-10 h-10 rounded-full object-cover"
-                    />
-                    <div>
-                      <p className="text-sm font-bold text-slate-900">{member.userId?.name || member.invitedEmail}</p>
-                      <p className="text-xs text-slate-400">{member.userId?.email || 'Invited'}</p>
-                    </div>
-                  </div>
-                  <span className="px-3 py-1 bg-slate-100 text-slate-700 text-xs font-semibold rounded-full capitalize">
-                    {member.role}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
+          <TripMembersTab
+            trip={trip}
+            members={members}
+            onMemberUpdated={fetchTripDetails}
+          />
         )}
       </div>
     </div>
