@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Compass, Mail, Lock, AlertCircle, ArrowRight, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -29,7 +31,8 @@ export default function LoginPage() {
       setLoading(true);
       setError('');
       await login(formData);
-      navigate('/dashboard');
+      const redirectTarget = searchParams.get('redirect') || location.state?.from?.pathname || '/dashboard';
+      navigate(redirectTarget);
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.');
     } finally {
@@ -85,6 +88,12 @@ export default function LoginPage() {
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-700">
                 Password
               </label>
+              <Link
+                to="/forgot-password"
+                className="text-xs font-semibold text-indigo-600 hover:text-indigo-500 transition-colors"
+              >
+                Forgot password?
+              </Link>
             </div>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">

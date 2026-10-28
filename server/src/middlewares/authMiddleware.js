@@ -33,9 +33,26 @@ const protect = async (req, res, next) => {
       });
     }
 
+    if (!user.userNumber) {
+      let candidate;
+      let exists = true;
+      let attempts = 0;
+      while (exists && attempts < 20) {
+        attempts++;
+        candidate = Math.floor(100000 + Math.random() * 900000);
+        const found = await User.findOne({ userNumber: candidate });
+        if (!found) {
+          exists = false;
+          user.userNumber = candidate;
+          await User.findByIdAndUpdate(user._id, { userNumber: candidate });
+        }
+      }
+    }
+
     req.user = user;
     next();
   } catch (error) {
+    console.error('Auth protect middleware error:', error);
     return res.status(401).json({
       success: false,
       message: 'Not authorized. Invalid or expired token.'

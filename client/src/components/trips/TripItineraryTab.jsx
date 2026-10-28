@@ -188,7 +188,7 @@ export default function TripItineraryTab({ trip, canEdit = true, onItineraryUpda
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            to="/ai-planner"
+            to={`/ai-planner?tripId=${trip._id}&destination=${encodeURIComponent(trip.destination || '')}&startDate=${trip.startDate ? new Date(trip.startDate).toISOString().split('T')[0] : ''}&endDate=${trip.endDate ? new Date(trip.endDate).toISOString().split('T')[0] : ''}&budget=${trip.budget || ''}&currency=${trip.currency || 'LKR'}&travelers=${trip.groupSize || 1}`}
             className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 transition-colors"
           >
             <Sparkles className="w-4 h-4 text-indigo-600" />

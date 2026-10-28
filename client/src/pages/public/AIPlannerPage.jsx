@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { aiService } from '../../services/aiService';
+import TripRouteMap from '../../components/trips/TripRouteMap';
 import {
   Sparkles,
   MapPin,
@@ -53,14 +54,82 @@ const TRAVEL_STYLES = [
 export default function AIPlannerPage() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // URL query parameters (prefilled if coming from an existing trip or link)
+  const tripIdParam = searchParams.get('tripId') || '';
+  const destParam = searchParams.get('destination') || '';
+  const startDateParam = searchParams.get('startDate') || '';
+  const endDateParam = searchParams.get('endDate') || '';
+  const budgetParam = searchParams.get('budget') || '';
+  const currencyParam = searchParams.get('currency') || 'LKR';
+  const travelersParam = searchParams.get('travelers') || '2';
+
+  // Helper date generators
+  const getTomorrowStr = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0];
+  };
+
+  const getFutureStr = (daysAhead) => {
+    const d = new Date();
+    d.setDate(d.getDate() + daysAhead);
+    return d.toISOString().split('T')[0];
+  };
 
   // Form states
-  const [destination, setDestination] = useState('Ella');
+  const [destination, setDestination] = useState(destParam || 'Ella');
+  const [startDate, setStartDate] = useState(startDateParam || getTomorrowStr());
+  const [endDate, setEndDate] = useState(endDateParam || getFutureStr(4));
   const [duration, setDuration] = useState(3);
+  const [customBudget, setCustomBudget] = useState(budgetParam || '');
+  const [currency, setCurrency] = useState(currencyParam || 'LKR');
   const [budget, setBudget] = useState('moderate');
   const [travelStyle, setTravelStyle] = useState('Romantic Couple');
-  const [travelersCount, setTravelersCount] = useState(2);
+  const [travelersCount, setTravelersCount] = useState(Number(travelersParam) || 2);
   const [specialInterests, setSpecialInterests] = useState('');
+
+  // Synchronize duration when dates change
+  useEffect(() => {
+    if (startDate && endDate) {
+      const s = new Date(startDate);
+      const e = new Date(endDate);
+      const diffDays = Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+      if (diffDays > 0) {
+        setDuration(Math.min(diffDays, 14));
+      }
+    }
+  }, [startDate, endDate]);
+
+  const handleStartDateChange = (e) => {
+    const newStart = e.target.value;
+    setStartDate(newStart);
+    if (newStart && endDate) {
+      const s = new Date(newStart);
+      const end = new Date(endDate);
+      if (end < s) {
+        // Automatically adjust end date
+        const autoEnd = new Date(s.getTime() + (duration - 1) * 24 * 60 * 60 * 1000);
+        setEndDate(autoEnd.toISOString().split('T')[0]);
+      }
+    }
+  };
+
+  const handleEndDateChange = (e) => {
+    const newEnd = e.target.value;
+    setEndDate(newEnd);
+  };
+
+  const handleDurationChange = (e) => {
+    const newDur = Number(e.target.value);
+    setDuration(newDur);
+    if (startDate) {
+      const s = new Date(startDate);
+      const autoEnd = new Date(s.getTime() + (newDur - 1) * 24 * 60 * 60 * 1000);
+      setEndDate(autoEnd.toISOString().split('T')[0]);
+    }
+  };
 
   // Execution states
   const [loading, setLoading] = useState(false);
@@ -85,6 +154,11 @@ export default function AIPlannerPage() {
       return;
     }
 
+    if (startDate && endDate && new Date(startDate) > new Date(endDate)) {
+      setError('End date must be on or after start date.');
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSaveSuccessMessage(null);
@@ -98,7 +172,11 @@ export default function AIPlannerPage() {
       const res = await aiService.generateItinerary({
         destination: destination.trim(),
         duration: Number(duration),
+        startDate: startDate || null,
+        endDate: endDate || null,
         budget,
+        customBudget: customBudget ? Number(customBudget) : null,
+        currency,
         travelStyle,
         travelersCount: Number(travelersCount),
         interests: interestsArray
@@ -136,11 +214,19 @@ export default function AIPlannerPage() {
     try {
       const res = await aiService.saveItineraryAsTrip({
         itinerary: itinerary,
-        startDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        startDate: startDate || itinerary.startDate,
+        endDate: endDate || itinerary.endDate,
+        customBudget: customBudget ? Number(customBudget) : itinerary.customBudget,
+        currency: currency || itinerary.currency,
+        tripId: tripIdParam || null
       });
 
       if (res.success && res.trip) {
-        setSaveSuccessMessage('Itinerary saved! Redirecting to your trip details...');
+        setSaveSuccessMessage(
+          tripIdParam
+            ? 'Itinerary updated for your existing trip! Redirecting...'
+            : 'Trip saved with your exact dates & budget! Redirecting...'
+        );
         setTimeout(() => {
           navigate(`/trips/${res.trip._id}`);
         }, 1200);
@@ -157,6 +243,7 @@ export default function AIPlannerPage() {
     if (!itinerary) return;
     let markdown = `# ${itinerary.tripTitle}\n\n`;
     markdown += `**Destination:** ${itinerary.destination}\n`;
+    markdown += `**Dates:** ${itinerary.startDate || startDate} to ${itinerary.endDate || endDate}\n`;
     markdown += `**Duration:** ${itinerary.durationDays} Days | **Estimated Cost:** ${itinerary.estimatedTotalCost}\n\n`;
     markdown += `### Overview\n${itinerary.summary}\n\n`;
 
@@ -184,13 +271,13 @@ export default function AIPlannerPage() {
             Voyanta AI Itinerary Architect
           </div>
           <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white leading-tight">
-            Design Your Perfect Sri Lanka Trip{' '}
+            Design Your Perfect Trip{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-indigo-400">
-              in Seconds
+              Within Your Exact Budget & Dates
             </span>
           </h1>
           <p className="mt-4 text-slate-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
-            Pick your destination, pace, and travel style. Our intelligent planner generates a realistic, balanced day-by-day plan packed with authentic local experiences.
+            Enter your destination, dates, and target budget. Our intelligent planner builds a realistic schedule that strictly respects your financial plan.
           </p>
         </div>
       </section>
@@ -223,54 +310,127 @@ export default function AIPlannerPage() {
               </div>
             </div>
 
-            {/* Destination & Duration Row */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Destination Input */}
-              <div className="md:col-span-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                  Destination or Region *
-                </label>
-                <div className="relative">
-                  <MapPin className="absolute left-3.5 top-3.5 w-5 h-5 text-indigo-500" />
-                  <input
-                    type="text"
-                    required
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    placeholder="e.g. Ella, Kandy, Galle Fort, Sigiriya..."
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium"
-                  />
-                </div>
+            {/* Destination Input */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                Destination or Region *
+              </label>
+              <div className="relative">
+                <MapPin className="absolute left-3.5 top-3.5 w-5 h-5 text-indigo-500" />
+                <input
+                  type="text"
+                  required
+                  value={destination}
+                  onChange={(e) => setDestination(e.target.value)}
+                  placeholder="e.g. Ella, Kandy, Galle Fort, Sigiriya, Tokyo, Paris..."
+                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium"
+                />
               </div>
+            </div>
 
-              {/* Duration Selector */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
-                  Duration (Days) *
-                </label>
-                <div className="relative">
-                  <Calendar className="absolute left-3.5 top-3.5 w-5 h-5 text-indigo-500" />
-                  <select
-                    value={duration}
-                    onChange={(e) => setDuration(Number(e.target.value))}
-                    className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium cursor-pointer"
-                  >
-                    {[1, 2, 3, 4, 5, 7, 10, 14].map((d) => (
-                      <option key={d} value={d}>
-                        {d} {d === 1 ? 'Day' : 'Days'}
-                      </option>
-                    ))}
-                  </select>
+            {/* Dates & Duration (Synchronized) */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2">
+                Travel Dates & Duration *
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Start Date */}
+                <div>
+                  <span className="block text-[11px] font-semibold text-slate-500 mb-1">Start Date</span>
+                  <div className="relative">
+                    <Calendar className="absolute left-3.5 top-3.5 w-4 h-4 text-indigo-500" />
+                    <input
+                      type="date"
+                      required
+                      value={startDate}
+                      onChange={handleStartDateChange}
+                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                {/* End Date */}
+                <div>
+                  <span className="block text-[11px] font-semibold text-slate-500 mb-1">End Date</span>
+                  <div className="relative">
+                    <Calendar className="absolute left-3.5 top-3.5 w-4 h-4 text-indigo-500" />
+                    <input
+                      type="date"
+                      required
+                      min={startDate}
+                      value={endDate}
+                      onChange={handleEndDateChange}
+                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+                    />
+                  </div>
+                </div>
+
+                {/* Duration */}
+                <div>
+                  <span className="block text-[11px] font-semibold text-slate-500 mb-1">Duration</span>
+                  <div className="relative">
+                    <Clock className="absolute left-3.5 top-3.5 w-4 h-4 text-indigo-500" />
+                    <select
+                      value={duration}
+                      onChange={handleDurationChange}
+                      className="w-full pl-10 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:bg-white cursor-pointer"
+                    >
+                      {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14].map((d) => (
+                        <option key={d} value={d}>
+                          {d} {d === 1 ? 'Day' : 'Days'}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             </div>
 
-            {/* Budget Category */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-2.5">
-                Budget Tier
-              </label>
+            {/* Target Budget & Currency */}
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-600">
+                  Target / Maximum Budget
+                </label>
+                <span className="text-[11px] text-teal-600 font-medium">
+                  ✓ AI guarantees total activities won't exceed this amount
+                </span>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* Budget Amount Input */}
+                <div className="sm:col-span-2">
+                  <div className="relative">
+                    <DollarSign className="absolute left-3.5 top-3.5 w-5 h-5 text-indigo-500" />
+                    <input
+                      type="number"
+                      min="0"
+                      value={customBudget}
+                      onChange={(e) => setCustomBudget(e.target.value)}
+                      placeholder="e.g. 15000 (leave blank for standard tier)"
+                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all font-medium"
+                    />
+                  </div>
+                </div>
+
+                {/* Currency */}
+                <div>
+                  <select
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-hidden focus:ring-2 focus:ring-indigo-500 focus:bg-white cursor-pointer"
+                  >
+                    <option value="LKR">LKR (Rs. / Sri Lankan Rupee)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="INR">INR (₹)</option>
+                    <option value="EUR">EUR (€)</option>
+                    <option value="GBP">GBP (£)</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Budget Tier Pill Radios */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
                 {BUDGET_OPTIONS.map((opt) => (
                   <div
                     key={opt.id}
@@ -345,6 +505,7 @@ export default function AIPlannerPage() {
               />
             </div>
 
+
             {/* Error Message */}
             {error && (
               <div className="flex items-center gap-2.5 p-4 text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-xl">
@@ -407,8 +568,13 @@ export default function AIPlannerPage() {
                   <span className="px-3 py-1 rounded-full bg-white/10 text-slate-200 text-xs font-semibold">
                     ⏱️ {itinerary.durationDays} Days Plan
                   </span>
+                  {(itinerary.startDate || startDate) && (
+                    <span className="px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold">
+                      📅 {itinerary.startDate || startDate} to {itinerary.endDate || endDate}
+                    </span>
+                  )}
                   <span className="px-3 py-1 rounded-full bg-teal-500/20 border border-teal-400/30 text-teal-300 text-xs font-semibold">
-                    💰 {itinerary.estimatedTotalCost} Estimated
+                    💰 {itinerary.estimatedTotalCost} (Budget: {itinerary.currency || currency} {itinerary.customBudget ? Number(itinerary.customBudget).toLocaleString() : budget})
                   </span>
                   <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-400/30 text-amber-300 text-xs font-semibold">
                     🎒 {itinerary.travelStyle}
@@ -471,7 +637,7 @@ export default function AIPlannerPage() {
                           : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
                       }`}
                     >
-                      Day {day.dayNumber}
+                      Day {day.dayNumber} {day.date ? `(${day.date.split('-').slice(1).join('/')})` : ''}
                     </button>
                   ))}
                 </div>
@@ -535,7 +701,7 @@ export default function AIPlannerPage() {
                                     {typeof act.estimatedCost === 'number'
                                       ? act.estimatedCost === 0
                                         ? 'Free Entry'
-                                        : `LKR ${act.estimatedCost.toLocaleString()}`
+                                        : `${itinerary.currency || currency || 'LKR'} ${act.estimatedCost.toLocaleString()}`
                                       : act.estimatedCost}
                                   </span>
                                 </div>
@@ -544,6 +710,35 @@ export default function AIPlannerPage() {
                           </div>
                         ))}
                       </div>
+
+                      {/* Interactive Route Map for this Day */}
+                      {day.activities && day.activities.length > 0 && (
+                        <div className="pt-6 border-t border-slate-100 space-y-3">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                            <MapPin className="w-4 h-4 text-indigo-600" /> Day {day.dayNumber} Route Map
+                          </h4>
+                          {(() => {
+                            const actStops = day.activities
+                              .map((a) => a.locationName || a.title)
+                              .filter(Boolean);
+                            const originPlace = actStops[0] || itinerary.destination;
+                            const destPlace = actStops.length > 1 ? actStops[actStops.length - 1] : itinerary.destination;
+                            const midStops = actStops.length > 2 ? actStops.slice(1, -1) : [];
+
+                            return (
+                              <TripRouteMap
+                                key={`ai-day-${day.dayNumber}-${actStops.join('-')}`}
+                                tripTitle={`Day ${day.dayNumber} Route: ${day.title}`}
+                                initialOrigin={originPlace}
+                                initialDestination={destPlace}
+                                initialWaypoints={midStops}
+                                height="420px"
+                                canEdit={false}
+                              />
+                            );
+                          })()}
+                        </div>
+                      )}
 
                       {/* Day navigation footer */}
                       <div className="pt-4 border-t border-slate-100 flex justify-between items-center text-xs">

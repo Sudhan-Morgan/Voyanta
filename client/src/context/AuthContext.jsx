@@ -12,17 +12,25 @@ export const AuthProvider = ({ children }) => {
     const savedUser = localStorage.getItem('voyanta_user') || localStorage.getItem('travelmate_user');
     const token = localStorage.getItem('voyanta_token') || localStorage.getItem('travelmate_token');
 
-    if (savedUser && token) {
+    if (savedUser && token && token !== 'undefined' && token !== 'null') {
       try {
-        setUser(JSON.parse(savedUser));
+        const parsed = JSON.parse(savedUser);
+        setUser(parsed);
         // Verify with backend
         authService.getMe()
           .then((res) => {
-            if (res.user) setUser(res.user);
+            if (res.user) {
+              setUser(res.user);
+              localStorage.setItem('voyanta_user', JSON.stringify(res.user));
+            }
           })
-          .catch(() => {
-            authService.logout();
-            setUser(null);
+          .catch((err) => {
+            console.warn('Backend session verification note:', err);
+            // Only clear session if token is explicitly invalid or expired
+            if (err?.response?.status === 401) {
+              authService.logout();
+              setUser(null);
+            }
           })
           .finally(() => setLoading(false));
       } catch (err) {
@@ -33,6 +41,13 @@ export const AuthProvider = ({ children }) => {
     } else {
       setLoading(false);
     }
+
+    // Listen for unauthorized/expired session events from api interceptor
+    const handleUnauthorized = () => {
+      setUser(null);
+    };
+    window.addEventListener('auth:unauthorized', handleUnauthorized);
+    return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, []);
 
   const login = async (credentials) => {
@@ -58,16 +73,45 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const addFavoritePlace = async (placeData) => {
+    const data = await authService.addFavoritePlace(placeData);
+    setUser(data.user);
+    return data;
+  };
+
+  const removeFavoritePlace = async (placeId) => {
+    const data = await authService.removeFavoritePlace(placeId);
+    setUser(data.user);
+    return data;
+  };
+
+  const sendRegisterOtp = async (data) => {
+    return await authService.sendRegisterOtp(data);
+  };
+
+  const verifyRegisterOtp = async (data) => {
+    return await authService.verifyRegisterOtp(data);
+  };
+
   return (
     <AuthContext.Provider
       value={{
         user,
-        isAuthenticated: !!user,
+        setUser,
+        isAuthenticated: Boolean(
+          user &&
+          (localStorage.getItem('voyanta_token') || localStorage.getItem('travelmate_token')) &&
+          (localStorage.getItem('voyanta_token') || localStorage.getItem('travelmate_token')) !== 'undefined'
+        ),
         loading,
         login,
         register,
+        sendRegisterOtp,
+        verifyRegisterOtp,
         logout,
-        updateProfile
+        updateProfile,
+        addFavoritePlace,
+        removeFavoritePlace
       }}
     >
       {children}
