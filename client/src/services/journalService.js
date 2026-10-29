@@ -31,3 +31,4 @@ export const journalService = {
     return response.data;
   }
 };
+

@@ -299,3 +299,4 @@ exports.getTripWeatherForecast = async (req, res) => {
     });
   }
 };
+

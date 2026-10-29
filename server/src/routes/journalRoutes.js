@@ -16,3 +16,4 @@ router.route('/:entryId')
 router.patch('/:entryId/like', journalController.toggleLikeJournalEntry);
 
 module.exports = router;
+
