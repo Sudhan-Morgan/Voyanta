@@ -9,6 +9,8 @@ router.route('/')
   .get(expenseController.getTripExpenses)
   .post(expenseController.addExpense);
 
+router.post('/settle-debt', expenseController.settleUserDebt);
+
 router.route('/:expenseId')
   .put(expenseController.updateExpense)
   .delete(expenseController.deleteExpense);

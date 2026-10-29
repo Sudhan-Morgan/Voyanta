@@ -178,14 +178,47 @@ export default function TripExpensesTab({ trip, members = [], onExpenseUpdated }
     }
   };
 
-  const handleToggleSettleShare = async (expenseId, targetUserId) => {
+  const handleToggleSettleShare = async (expenseId, targetUserId, newHasPaid) => {
+    // Optimistic UI update so the user immediately sees the tick / paid status
+    setData((prev) => {
+      const updatedExpenses = (prev.expenses || []).map((exp) => {
+        if (exp._id === expenseId) {
+          const updatedSplit = (exp.splitBetween || []).map((s) => {
+            const sUid = (s.userId?._id || s.userId)?.toString();
+            if (sUid === targetUserId?.toString()) {
+              return {
+                ...s,
+                hasPaid: typeof newHasPaid === 'boolean' ? newHasPaid : !s.hasPaid
+              };
+            }
+            return s;
+          });
+          return { ...exp, splitBetween: updatedSplit };
+        }
+        return exp;
+      });
+      return { ...prev, expenses: updatedExpenses };
+    });
+
     try {
-      const res = await expenseService.settleShare(trip._id, expenseId, targetUserId);
+      const res = await expenseService.settleShare(trip._id, expenseId, targetUserId, newHasPaid);
       if (res.success) {
         loadExpenses();
       }
     } catch (err) {
       console.error('Failed to toggle share payment status:', err);
+      loadExpenses();
+    }
+  };
+
+  const handleSettleUserDebt = async (fromUserId, toUserId) => {
+    try {
+      const res = await expenseService.settleUserDebt(trip._id, fromUserId, toUserId);
+      if (res.success) {
+        loadExpenses();
+      }
+    } catch (err) {
+      console.error('Failed to settle debts:', err);
     }
   };
 
@@ -344,12 +377,18 @@ export default function TripExpensesTab({ trip, members = [], onExpenseUpdated }
             </div>
           </div>
 
-          {/* Settlement Suggestions */}
+          {/* Settlement Suggestions / Waiting Payments */}
           {data.settlements && data.settlements.length > 0 ? (
             <div className="space-y-3">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 block">
-                Suggested Repayments
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-amber-500" />
+                  Waiting Payments ({data.settlements.length})
+                </span>
+                <span className="text-[11px] text-slate-400">
+                  Click 'Settle' once payment received
+                </span>
+              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {data.settlements.map((s, idx) => {
                   const debtor = members.find((m) => (m.userId?._id || m.userId)?.toString() === s.fromUserId?.toString());
@@ -361,25 +400,48 @@ export default function TripExpensesTab({ trip, members = [], onExpenseUpdated }
                   return (
                     <div
                       key={idx}
-                      className="p-3.5 rounded-2xl bg-indigo-50/50 border border-indigo-100/80 flex items-center justify-between gap-3"
+                      className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200/80 flex items-center justify-between gap-3 shadow-xs hover:border-amber-300 transition-all"
                     >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="text-xs font-bold text-slate-800 truncate">{debtorName}</span>
-                        <ArrowRight className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                        <span className="text-xs font-bold text-indigo-700 truncate">{creditorName}</span>
+                      <div className="min-w-0 space-y-1">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-xs font-bold text-slate-800 truncate">{debtorName}</span>
+                          <ArrowRight className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                          <span className="text-xs font-bold text-indigo-700 truncate">{creditorName}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-[11px] text-amber-700 font-semibold">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                          <span>Waiting for payment</span>
+                        </div>
                       </div>
-                      <span className="px-2.5 py-1 rounded-lg bg-white text-xs font-black text-slate-900 shadow-xs shrink-0">
-                        {trip.currency} {s.amount.toLocaleString()}
-                      </span>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="px-2.5 py-1 rounded-lg bg-white text-xs font-black text-slate-900 shadow-xs border border-amber-100">
+                          {trip.currency} {s.amount.toLocaleString()}
+                        </span>
+                        <button
+                          onClick={() => handleSettleUserDebt(s.fromUserId, s.toUserId)}
+                          title="Mark payment received & remove waiting payment"
+                          className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs flex items-center gap-1 transition-all hover:scale-105 cursor-pointer"
+                        >
+                          <Check className="w-3.5 h-3.5 stroke-[3]" />
+                          <span>Settle</span>
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
               </div>
             </div>
           ) : (
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-center">
-              <p className="text-xs font-medium text-slate-500">
+            <div className="p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/80 text-center space-y-1">
+              <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 mb-1">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <p className="text-xs font-bold text-emerald-900">
                 🎉 All group expenses are currently balanced and settled!
+              </p>
+              <p className="text-[11px] text-emerald-700">
+                No members are currently waiting for payment.
               </p>
             </div>
           )}
@@ -519,26 +581,59 @@ export default function TripExpensesTab({ trip, members = [], onExpenseUpdated }
 
                       {/* Split member pills */}
                       {exp.splitBetween && exp.splitBetween.length > 0 && (
-                        <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
-                          <span className="text-[11px] text-slate-400">Split ({exp.splitBetween.length}):</span>
+                        <div className="flex flex-wrap items-center gap-2 pt-2">
+                          <span className="text-[11px] font-semibold text-slate-400">
+                            Split ({exp.splitBetween.length}):
+                          </span>
                           {exp.splitBetween.map((share, idx) => {
                             const shareUser = share.userId?.name || 'Member';
-                            const targetUid = share.userId?._id || share.userId;
+                            const targetUid = (share.userId?._id || share.userId)?.toString();
+                            const isPayer = targetUid === (exp.paidByUserId?._id || exp.paidByUserId)?.toString();
 
                             return (
-                              <button
+                              <div
                                 key={idx}
-                                title={share.hasPaid ? 'Paid - Click to toggle unpaid' : 'Unpaid - Click to mark paid'}
-                                onClick={() => handleToggleSettleShare(exp._id, targetUid)}
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-[11px] font-medium transition-colors cursor-pointer ${
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-xs font-semibold shadow-2xs transition-all ${
                                   share.hasPaid
-                                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                    : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'
+                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                    : 'bg-amber-50 text-amber-900 border border-amber-200'
                                 }`}
                               >
-                                {share.hasPaid ? <Check className="w-3 h-3 text-emerald-600" /> : <Clock className="w-3 h-3 text-rose-500" />}
-                                <span>{shareUser}: {trip.currency} {share.shareAmount}</span>
-                              </button>
+                                {share.hasPaid ? (
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                                ) : (
+                                  <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                                )}
+
+                                <span>
+                                  {shareUser}: {trip.currency} {(share.shareAmount || 0).toLocaleString()}
+                                </span>
+
+                                {share.hasPaid ? (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded-md">
+                                    ✓ Paid
+                                  </span>
+                                ) : (
+                                  <button
+                                    onClick={() => handleToggleSettleShare(exp._id, targetUid, true)}
+                                    title="Click to mark as paid & remove waiting payment"
+                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition-transform hover:scale-105 cursor-pointer ml-1"
+                                  >
+                                    <Check className="w-3 h-3 stroke-[3]" />
+                                    <span>Mark Paid</span>
+                                  </button>
+                                )}
+
+                                {share.hasPaid && !isPayer && (
+                                  <button
+                                    onClick={() => handleToggleSettleShare(exp._id, targetUid, false)}
+                                    title="Undo paid status"
+                                    className="p-0.5 text-slate-400 hover:text-rose-600 hover:bg-emerald-100/60 rounded-md transition-colors cursor-pointer"
+                                  >
+                                    <X className="w-2.5 h-2.5" />
+                                  </button>
+                                )}
+                              </div>
                             );
                           })}
                         </div>
