@@ -300,3 +300,4 @@ export default function TripWeatherWidget({ tripId, destination, startDate, endD
     </div>
   );
 }
+

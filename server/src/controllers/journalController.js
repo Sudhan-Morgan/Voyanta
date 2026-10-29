@@ -270,3 +270,4 @@ exports.toggleLikeJournalEntry = async (req, res) => {
     });
   }
 };
+

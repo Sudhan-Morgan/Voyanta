@@ -803,3 +803,4 @@ export default function TripJournalTab({ trip, members = [] }) {
     </div>
   );
 }
+

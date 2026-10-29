@@ -7,3 +7,4 @@ export const weatherService = {
     return response.data;
   }
 };
+

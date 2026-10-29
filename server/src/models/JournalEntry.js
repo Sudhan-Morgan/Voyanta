@@ -67,3 +67,4 @@ const journalEntrySchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model('JournalEntry', journalEntrySchema);
+
