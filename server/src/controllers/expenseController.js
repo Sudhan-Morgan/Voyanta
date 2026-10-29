@@ -28,22 +28,27 @@ const calculateSettlements = (expenses, members) => {
 
   members.forEach((m) => {
     const uid = m.userId?._id?.toString() || m._id?.toString();
-    balances[uid] = 0;
+    if (uid) balances[uid] = 0;
   });
 
   expenses.forEach((exp) => {
     const payerId = exp.paidByUserId?._id?.toString() || exp.paidByUserId?.toString();
-    const amount = Number(exp.amount) || 0;
+    if (!payerId) return;
 
     if (balances[payerId] === undefined) balances[payerId] = 0;
-    balances[payerId] += amount;
 
     if (Array.isArray(exp.splitBetween) && exp.splitBetween.length > 0) {
       exp.splitBetween.forEach((share) => {
         const shareUid = share.userId?._id?.toString() || share.userId?.toString();
-        if (shareUid) {
-          if (balances[shareUid] === undefined) balances[shareUid] = 0;
-          balances[shareUid] -= Number(share.shareAmount) || 0;
+        if (!shareUid) return;
+
+        if (balances[shareUid] === undefined) balances[shareUid] = 0;
+
+        // Only unpaid shares by members other than the payer count as active debt
+        if (shareUid !== payerId && !share.hasPaid) {
+          const shareAmt = Number(share.shareAmount) || 0;
+          balances[shareUid] -= shareAmt;
+          balances[payerId] += shareAmt;
         }
       });
     }
@@ -56,9 +61,9 @@ const calculateSettlements = (expenses, members) => {
   Object.entries(balances).forEach(([uid, net]) => {
     // Round to 2 decimal places to avoid float issues
     const rounded = Math.round(net * 100) / 100;
-    if (rounded > 1) {
+    if (rounded > 0.5) {
       creditors.push({ userId: uid, amount: rounded });
-    } else if (rounded < -1) {
+    } else if (rounded < -0.5) {
       debtors.push({ userId: uid, amount: -rounded });
     }
   });
@@ -330,13 +335,13 @@ exports.deleteExpense = async (req, res) => {
   }
 };
 
-// @desc    Toggle hasPaid status for a specific user share
+// @desc    Toggle or set hasPaid status for a specific user share
 // @route   PATCH /api/trips/:tripId/expenses/:expenseId/settle
 // @access  Private
 exports.settleExpenseShare = async (req, res) => {
   try {
     const { tripId, expenseId } = req.params;
-    const { userId } = req.body;
+    const { userId, hasPaid } = req.body;
 
     const access = await checkTripAccess(tripId, req.user._id);
     if (access.error) {
@@ -350,15 +355,19 @@ exports.settleExpenseShare = async (req, res) => {
 
     const targetUserId = userId || req.user._id.toString();
     const shareIndex = expense.splitBetween.findIndex(
-      (s) => s.userId.toString() === targetUserId.toString()
+      (s) => (s.userId?._id || s.userId).toString() === targetUserId.toString()
     );
 
     if (shareIndex === -1) {
       return res.status(400).json({ success: false, message: 'User share not found in this expense' });
     }
 
-    // Toggle hasPaid status
-    expense.splitBetween[shareIndex].hasPaid = !expense.splitBetween[shareIndex].hasPaid;
+    // Set or toggle hasPaid status
+    if (typeof hasPaid === 'boolean') {
+      expense.splitBetween[shareIndex].hasPaid = hasPaid;
+    } else {
+      expense.splitBetween[shareIndex].hasPaid = !expense.splitBetween[shareIndex].hasPaid;
+    }
     await expense.save();
 
     const updated = await Expense.findById(expense._id)
@@ -375,6 +384,58 @@ exports.settleExpenseShare = async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to settle share',
+      error: error.message
+    });
+  }
+};
+
+// @desc    Settle all debts from one user to another for a trip
+// @route   POST /api/trips/:tripId/expenses/settle-debt
+// @access  Private
+exports.settleUserDebt = async (req, res) => {
+  try {
+    const { tripId } = req.params;
+    const { fromUserId, toUserId } = req.body;
+
+    const access = await checkTripAccess(tripId, req.user._id);
+    if (access.error) {
+      return res.status(access.status).json({ success: false, message: access.error });
+    }
+
+    if (!fromUserId || !toUserId) {
+      return res.status(400).json({ success: false, message: 'fromUserId and toUserId are required' });
+    }
+
+    // Find all expenses in this trip where toUserId paid and fromUserId has unpaid share
+    const expenses = await Expense.find({
+      tripId,
+      paidByUserId: toUserId,
+      splitBetween: {
+        $elemMatch: {
+          userId: fromUserId,
+          hasPaid: false
+        }
+      }
+    });
+
+    for (const exp of expenses) {
+      exp.splitBetween.forEach((s) => {
+        if ((s.userId?._id || s.userId).toString() === fromUserId.toString()) {
+          s.hasPaid = true;
+        }
+      });
+      await exp.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'All debts between users settled successfully'
+    });
+  } catch (error) {
+    console.error('Settle User Debt Error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to settle debts',
       error: error.message
     });
   }
