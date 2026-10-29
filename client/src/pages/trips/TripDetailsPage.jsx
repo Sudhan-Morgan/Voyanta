@@ -7,6 +7,8 @@ import TripItineraryTab from '../../components/trips/TripItineraryTab';
 import TripRouteMap from '../../components/trips/TripRouteMap';
 import TripForumTab from '../../components/trips/TripForumTab';
 import TripMembersTab from '../../components/trips/TripMembersTab';
+import TripWeatherWidget from '../../components/trips/TripWeatherWidget';
+import TripJournalTab from '../../components/trips/TripJournalTab';
 import { itineraryService } from '../../services/itineraryService';
 import {
   Calendar,
@@ -26,7 +28,9 @@ import {
   AlertCircle,
   Route,
   MessageSquare,
-  UserPlus
+  UserPlus,
+  BookOpen,
+  CloudSun
 } from 'lucide-react';
 
 export default function TripDetailsPage() {
@@ -201,6 +205,8 @@ export default function TripDetailsPage() {
           {[
             { id: 'overview', label: 'Trip Overview' },
             { id: 'itinerary', label: `Itinerary (${stats?.itineraryCount || 0})` },
+            { id: 'weather', label: 'Weather Forecast' },
+            { id: 'journal', label: 'Travel Journal' },
             { id: 'route-map', label: 'Route & Map' },
             { id: 'forum', label: 'Discussion Forum' },
             { id: 'budget', label: 'Budget & Expenses' },
@@ -226,6 +232,14 @@ export default function TripDetailsPage() {
         {activeTab === 'overview' && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
+              {/* Trip Dates Weather Forecast Spotlight */}
+              <TripWeatherWidget
+                tripId={trip._id}
+                destination={trip.destination}
+                startDate={trip.startDate}
+                endDate={trip.endDate}
+              />
+
               {/* Trip Highlight Card */}
               <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-xs space-y-4">
                 <h3 className="text-base font-bold text-slate-900">Trip Highlights & Interests</h3>
@@ -409,6 +423,21 @@ export default function TripDetailsPage() {
               );
             })()}
           </div>
+        )}
+
+        {/* WEATHER FORECAST TAB */}
+        {activeTab === 'weather' && (
+          <TripWeatherWidget
+            tripId={trip._id}
+            destination={trip.destination}
+            startDate={trip.startDate}
+            endDate={trip.endDate}
+          />
+        )}
+
+        {/* TRAVEL JOURNAL & MEMORIES TAB */}
+        {activeTab === 'journal' && (
+          <TripJournalTab trip={trip} members={members} />
         )}
 
         {/* DISCUSSION FORUM TAB */}

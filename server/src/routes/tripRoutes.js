@@ -42,5 +42,12 @@ router.use('/:tripId/expenses', require('./expenseRoutes'));
 // Nested routes for trip itinerary items
 router.use('/:tripId/itinerary', require('./itineraryRoutes'));
 
+// Nested routes for travel journal & memories
+router.use('/:tripId/journal', require('./journalRoutes'));
+
+// Trip date-based weather forecast
+const { getTripWeatherForecast } = require('../controllers/weatherController');
+router.get('/:tripId/weather', getTripWeatherForecast);
+
 module.exports = router;
 
