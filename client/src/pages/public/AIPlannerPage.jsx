@@ -283,25 +283,29 @@ export default function AIPlannerPage() {
       </section>
 
       {/* Main Container */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 sm:-mt-14">
         {/* Interactive Configuration Card */}
-        <div className="bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-100 p-6 sm:p-10 mb-12">
+        <div className="bg-white rounded-3xl shadow-2xl shadow-indigo-950/10 border border-slate-200/80 p-6 sm:p-10 mb-12">
           <form onSubmit={handleGenerate} className="space-y-8">
             {/* Quick Hotspot Chips */}
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">
-                Popular Sri Lankan Destinations
-              </label>
-              <div className="flex flex-wrap gap-2">
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  Popular Sri Lankan Destinations
+                </label>
+                <span className="text-[11px] text-slate-400">Click to auto-fill destination</span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
                 {POPULAR_DESTINATIONS.map((dest) => (
                   <button
                     key={dest.name}
                     type="button"
                     onClick={() => setDestination(dest.name)}
-                    className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                       destination.toLowerCase() === dest.name.toLowerCase()
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20 scale-105'
-                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80'
+                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25 scale-105 ring-2 ring-indigo-300'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-slate-200/70'
                     }`}
                   >
                     📍 {dest.name}

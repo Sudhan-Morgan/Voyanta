@@ -625,6 +625,65 @@ export default function CreateTripPage() {
               </span>
             </div>
 
+            {/* Featured Sri Lanka Places Quick Cards */}
+            <div className="space-y-2 pt-1">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Popular Places in Sri Lanka
+                </span>
+                <span className="text-slate-400 text-[11px]">Click a card to auto-fill trip</span>
+              </div>
+
+              <div className="flex items-center gap-3 overflow-x-auto pb-3 pt-1 scrollbar-thin">
+                {[
+                  { id: 'matale', name: 'Sigiriya Rock', district: 'Matale', img: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=400&q=80', tag: 'Ancient Fortress' },
+                  { id: 'galle', name: 'Galle Fort', district: 'Galle', img: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=400&q=80', tag: 'Colonial Beach' },
+                  { id: 'badulla', name: 'Ella Nine Arch', district: 'Badulla', img: 'https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=400&q=80', tag: 'Hill Country' },
+                  { id: 'kandy', name: 'Kandy Temple', district: 'Kandy', img: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=400&q=80', tag: 'Sacred Heritage' },
+                  { id: 'matara', name: 'Mirissa Coast', district: 'Matara', img: 'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=400&q=80', tag: 'Whale Watching' },
+                  { id: 'nuwara-eliya', name: 'Nuwara Eliya', district: 'Nuwara Eliya', img: 'https://images.unsplash.com/photo-1543731068-7e0f5beff43a?auto=format&fit=crop&w=400&q=80', tag: 'Tea Country' },
+                  { id: 'hambantota', name: 'Yala Safari', district: 'Hambantota', img: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?auto=format&fit=crop&w=400&q=80', tag: 'Leopard & Wildlife' },
+                  { id: 'jaffna', name: 'Jaffna Coast', district: 'Jaffna', img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80', tag: 'Northern Culture' },
+                ].map((place) => {
+                  const isSelected = selectedDistrictId === place.id && !isCustomDestination;
+                  return (
+                    <button
+                      key={place.id}
+                      type="button"
+                      onClick={() => handleDistrictChange({ target: { value: place.id } })}
+                      className={`relative shrink-0 w-36 h-28 rounded-2xl overflow-hidden border-2 text-left transition-all duration-300 group cursor-pointer ${
+                        isSelected
+                          ? 'border-indigo-600 ring-4 ring-indigo-500/25 scale-102 shadow-lg shadow-indigo-500/20'
+                          : 'border-slate-200 hover:border-indigo-400 opacity-90 hover:opacity-100 hover:scale-102'
+                      }`}
+                    >
+                      <img
+                        src={place.img}
+                        alt={place.name}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
+                      <div className="absolute top-1.5 right-1.5">
+                        {isSelected && (
+                          <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shadow-md">
+                            ✓
+                          </span>
+                        )}
+                      </div>
+                      <div className="absolute bottom-2 left-2 right-2 text-white">
+                        <span className="block text-[9px] font-bold uppercase tracking-wider text-amber-300 truncate">
+                          {place.tag}
+                        </span>
+                        <span className="block text-xs font-black truncate drop-shadow-sm">
+                          {place.name}
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               {/* Destination Dropdown for Sri Lanka Districts */}
               <div>

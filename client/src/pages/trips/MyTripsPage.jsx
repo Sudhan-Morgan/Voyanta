@@ -275,73 +275,95 @@ export default function MyTripsPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredTrips.map((trip) => (
-            <Link
-              key={trip._id}
-              to={`/trips/${trip._id}`}
-              className="group bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-xl hover:border-indigo-200 transition-all duration-300 flex flex-col overflow-hidden"
-            >
-              {/* Cover Image & Badges */}
-              <div className="relative h-48 w-full overflow-hidden">
-                <img
-                  src={trip.coverImage}
-                  alt={trip.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute top-3 left-3">
-                  <span
-                    className={`px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider border shadow-xs ${getStatusBadge(
-                      trip.status
-                    )}`}
-                  >
-                    {trip.status}
-                  </span>
-                </div>
-                <div className="absolute top-3 right-3 flex items-center gap-1.5">
-                  <button
-                    onClick={(e) => handleDeleteTrip(e, trip._id)}
-                    title="Delete Trip"
-                    disabled={deletingId === trip._id}
-                    className="p-1.5 rounded-lg bg-white/90 hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors shadow-xs"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+          {filteredTrips.map((trip) => {
+            const calculateDuration = (start, end) => {
+              if (!start || !end) return 1;
+              const s = new Date(start);
+              const e = new Date(end);
+              const diff = Math.round((e.getTime() - s.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+              return diff > 0 ? diff : 1;
+            };
 
-              {/* Trip Info */}
-              <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
-                <div>
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 mb-1">
-                    <MapPin className="w-3.5 h-3.5" />
-                    <span>{trip.destination}</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
-                    {trip.title}
-                  </h3>
-                  <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500">
-                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{formatDateRange(trip.startDate, trip.endDate)}</span>
-                  </div>
-                </div>
+            return (
+              <Link
+                key={trip._id}
+                to={`/trips/${trip._id}`}
+                className="group relative bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:shadow-indigo-500/10 hover:border-indigo-300 transition-all duration-300 flex flex-col overflow-hidden hover:-translate-y-1"
+              >
+                {/* Cover Image & Badges */}
+                <div className="relative h-52 w-full overflow-hidden bg-slate-900">
+                  <img
+                    src={trip.coverImage || 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=800&q=80'}
+                    alt={trip.title}
+                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
 
-                {/* Footer Stats */}
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
-                  <div className="flex items-center gap-1">
-                    <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-                    <span className="font-semibold">
-                      {trip.currency} {trip.budget.toLocaleString()}
+                  {/* Top Badges */}
+                  <div className="absolute top-3.5 left-3.5 flex items-center gap-1.5">
+                    <span
+                      className={`px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-wider backdrop-blur-md border shadow-xs ${getStatusBadge(
+                        trip.status
+                      )}`}
+                    >
+                      {trip.status}
+                    </span>
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-900/80 backdrop-blur-md text-emerald-300 border border-emerald-400/20">
+                      {calculateDuration(trip.startDate, trip.endDate)} Days
                     </span>
                   </div>
 
-                  <div className="flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{trip.groupSize} {trip.groupSize === 1 ? 'person' : 'people'}</span>
+                  <div className="absolute top-3.5 right-3.5 flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteTrip(e, trip._id)}
+                      title="Delete Trip"
+                      disabled={deletingId === trip._id}
+                      className="p-2 rounded-full bg-slate-900/60 hover:bg-rose-600 text-white backdrop-blur-md transition-all shadow-md hover:scale-110 cursor-pointer"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  {/* Bottom Image Overlay Details */}
+                  <div className="absolute bottom-3 left-4 right-4">
+                    <div className="flex items-center gap-1.5 text-xs font-semibold text-amber-300 mb-0.5">
+                      <MapPin className="w-3.5 h-3.5 shrink-0" />
+                      <span className="truncate drop-shadow-sm">{trip.destination}</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+
+                {/* Trip Info */}
+                <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                  <div>
+                    <h3 className="text-lg font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                      {trip.title}
+                    </h3>
+                    <div className="mt-2 flex items-center gap-1.5 text-xs text-slate-500 font-medium">
+                      <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+                      <span>{formatDateRange(trip.startDate, trip.endDate)}</span>
+                    </div>
+                  </div>
+
+                  {/* Footer Stats */}
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600 font-bold">
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
+                      <span className="text-slate-900">
+                        {trip.currency} {trip.budget.toLocaleString()}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-slate-500">
+                      <Users className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>{trip.groupSize} {trip.groupSize === 1 ? 'person' : 'people'}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
