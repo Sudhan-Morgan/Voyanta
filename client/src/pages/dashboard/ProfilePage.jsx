@@ -29,7 +29,8 @@ import {
   X,
   Sliders,
   Users,
-  Copy
+  Copy,
+  LogOut
 } from 'lucide-react';
 import FriendsManagerTab from '../../components/profile/FriendsManagerTab';
 
@@ -110,7 +111,7 @@ const SUGGESTED_PLACES = [
 const CATEGORIES = ['All', 'Beach', 'Mountain', 'Heritage', 'City', 'Nature', 'Wildlife', 'Adventure'];
 
 export default function ProfilePage() {
-  const { user, loading: authLoading, updateProfile, addFavoritePlace, removeFavoritePlace } = useAuth();
+  const { user, loading: authLoading, updateProfile, addFavoritePlace, removeFavoritePlace, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -682,6 +683,20 @@ export default function ProfilePage() {
               <Compass className="w-4 h-4" />
               Explore Sri Lanka
             </Link>
+            <button
+              type="button"
+              onClick={() => {
+                if (window.confirm('Are you sure you want to log out of Voyanta?')) {
+                  logout();
+                  navigate('/login');
+                }
+              }}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/40 border border-rose-300/30 text-rose-100 hover:text-white text-sm font-semibold transition-all cursor-pointer"
+              title="Log Out of your account"
+            >
+              <LogOut className="w-4 h-4 text-rose-300" />
+              Log Out
+            </button>
           </div>
         </div>
       </div>
