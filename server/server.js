@@ -32,15 +32,30 @@ app.use('/api', (req, res, next) => {
   next();
 });
 
-// API Routes
-app.use('/api/auth', require('./src/routes/authRoutes'));
-app.use('/api/friends', require('./src/routes/friendRoutes'));
-app.use('/api/trips', require('./src/routes/tripRoutes'));
-app.use('/api/destinations', require('./src/routes/destinationRoutes'));
-app.use('/api/ai', require('./src/routes/aiRoutes'));
+// API Routes (supports both /api/* and root /*)
+const authRoutes = require('./src/routes/authRoutes');
+const friendRoutes = require('./src/routes/friendRoutes');
+const tripRoutes = require('./src/routes/tripRoutes');
+const destinationRoutes = require('./src/routes/destinationRoutes');
+const aiRoutes = require('./src/routes/aiRoutes');
+
+app.use('/api/auth', authRoutes);
+app.use('/auth', authRoutes);
+
+app.use('/api/friends', friendRoutes);
+app.use('/friends', friendRoutes);
+
+app.use('/api/trips', tripRoutes);
+app.use('/trips', tripRoutes);
+
+app.use('/api/destinations', destinationRoutes);
+app.use('/destinations', destinationRoutes);
+
+app.use('/api/ai', aiRoutes);
+app.use('/ai', aiRoutes);
 
 // Health check route
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health'], (req, res) => {
   res.status(200).json({
     status: 'success',
     message: 'Voyanta API is running smoothly',

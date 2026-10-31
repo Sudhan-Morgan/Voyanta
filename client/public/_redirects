@@ -1,2 +1,3 @@
 /api/*    https://voyantaa-xvzz.onrender.com/api/:splat    200!
+/auth/*   https://voyantaa-xvzz.onrender.com/auth/:splat   200!
 /*        /index.html                                     200
