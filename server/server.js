@@ -3,9 +3,10 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const connectDB = require('./src/config/db');
+const fs = require('fs');
+const path = require('path');
 
 // Load environment variables (supports running from root or server dir)
-const path = require('path');
 dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config();
 
@@ -48,8 +49,6 @@ app.get('/api/health', (req, res) => {
 });
 
 // Serve static client assets in production if client build exists
-const fs = require('fs');
-const path = require('path');
 const clientDistPath = path.join(__dirname, '../client/dist');
 
 if (fs.existsSync(clientDistPath)) {
@@ -95,4 +94,3 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Voyanta Server running on http://localhost:${PORT}`);
 });
-
