@@ -34,21 +34,21 @@ export const SRI_LANKA_DISTRICTS = [
         id: 'colombo',
         name: 'Colombo',
         highlights: 'Colombo Fort, Galle Face Green, Gangaramaya Temple, Mount Lavinia Beach',
-        coverImage: 'https://images.unsplash.com/photo-1578652197841-39e3fa7c0f18?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e3/Sunset_at_Galle_Face_Colombo.JPG/1280px-Sunset_at_Galle_Face_Colombo.JPG',
         suggestedInterests: ['Historical & Culture', 'Sri Lankan Culinary']
       },
       {
         id: 'gampaha',
         name: 'Gampaha',
         highlights: 'Negombo Beach & Lagoon, Kelaniya Raja Maha Vihara, Henarathgoda Gardens',
-        coverImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e0/Negombo_Beach_Sri_Lanka.jpg/1280px-Negombo_Beach_Sri_Lanka.jpg',
         suggestedInterests: ['Beach & Coastal', 'Historical & Culture']
       },
       {
         id: 'kalutara',
         name: 'Kalutara',
         highlights: 'Kalutara Bodhiya, Richmond Castle, Bentota Beach Resort, Barberyn Lighthouse',
-        coverImage: 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Sri_Lanka%2C_Bentota%2C_beach_%281%29.JPG/1280px-Sri_Lanka%2C_Bentota%2C_beach_%281%29.JPG',
         suggestedInterests: ['Beach & Coastal', 'Temple & Heritage']
       }
     ]
@@ -60,21 +60,21 @@ export const SRI_LANKA_DISTRICTS = [
         id: 'kandy',
         name: 'Kandy',
         highlights: 'Temple of the Sacred Tooth Relic (Dalada Maligawa), Kandy Lake, Peradeniya Gardens',
-        coverImage: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/SL_Kandy_asv2020-01_img34_Sacred_Tooth_Temple.jpg/1280px-SL_Kandy_asv2020-01_img34_Sacred_Tooth_Temple.jpg',
         suggestedInterests: ['Temple & Heritage', 'Historical & Culture', 'Scenic Train Journeys']
       },
       {
         id: 'matale',
         name: 'Matale',
         highlights: 'Sigiriya Rock Fortress, Dambulla Cave Temple, Riverston & Knuckles Range',
-        coverImage: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Sigiriya_Rock_Fortress_View_from_Pidurangala_Rock.jpg/1280px-Sigiriya_Rock_Fortress_View_from_Pidurangala_Rock.jpg',
         suggestedInterests: ['Historical & Culture', 'Adventure & Surfing', 'Temple & Heritage']
       },
       {
         id: 'nuwara-eliya',
         name: 'Nuwara Eliya',
         highlights: 'Little England, Gregory Lake, Horton Plains & World\'s End, Pedro Tea Estate',
-        coverImage: 'https://images.unsplash.com/photo-1543731068-7e0f5beff43a?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Sri_Lanka%2C_Tea_plantation_Nuwara_Eliya.jpg/1280px-Sri_Lanka%2C_Tea_plantation_Nuwara_Eliya.jpg',
         suggestedInterests: ['Hill Country & Tea', 'Scenic Train Journeys']
       }
     ]
@@ -86,21 +86,21 @@ export const SRI_LANKA_DISTRICTS = [
         id: 'galle',
         name: 'Galle',
         highlights: 'Galle Dutch Fort, Iconic Lighthouse, Unawatuna Beach, Hikkaduwa Coral Reef',
-        coverImage: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Galle_Fort.jpg/1280px-Galle_Fort.jpg',
         suggestedInterests: ['Beach & Coastal', 'Historical & Culture', 'Sri Lankan Culinary']
       },
       {
         id: 'matara',
         name: 'Matara',
         highlights: 'Mirissa Blue Whale Watching, Coconut Tree Hill, Dondra Head Lighthouse, Polhena Beach',
-        coverImage: 'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Coconut_tree_hills.jpg/1280px-Coconut_tree_hills.jpg',
         suggestedInterests: ['Beach & Coastal', 'Wildlife Safari', 'Adventure & Surfing']
       },
       {
         id: 'hambantota',
         name: 'Hambantota',
         highlights: 'Yala National Park Safari, Bundala Bird Sanctuary, Tangalle Silent Beach',
-        coverImage: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Sri_Lankan_Leopard_At_Yala_National_Park.jpg/1280px-Sri_Lankan_Leopard_At_Yala_National_Park.jpg',
         suggestedInterests: ['Wildlife Safari', 'Beach & Coastal']
       }
     ]
@@ -112,35 +112,35 @@ export const SRI_LANKA_DISTRICTS = [
         id: 'jaffna',
         name: 'Jaffna',
         highlights: 'Nallur Kandaswamy Kovil, Jaffna Fort, Casuarina Beach, Nainativu Island',
-        coverImage: 'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Nallur_Kandasamy_front_entrance.jpg/1280px-Nallur_Kandasamy_front_entrance.jpg',
         suggestedInterests: ['Temple & Heritage', 'Historical & Culture', 'Sri Lankan Culinary']
       },
       {
         id: 'kilinochchi',
         name: 'Kilinochchi',
         highlights: 'Iranamadu Giant Reservoir, Kilinochchi Landmark, Scenic Rural Landscapes',
-        coverImage: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/49/Iranamadu_Tank_Spill.jpg/1280px-Iranamadu_Tank_Spill.jpg',
         suggestedInterests: ['Historical & Culture']
       },
       {
         id: 'mannar',
         name: 'Mannar',
         highlights: 'Mannar Portuguese Fort, Ancient Baobab Tree, Adam\'s Bridge / Rama Setu, Bird Sanctuary',
-        coverImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Baobab_tree_in_Mannar.jpg/1280px-Baobab_tree_in_Mannar.jpg',
         suggestedInterests: ['Historical & Culture', 'Wildlife Safari']
       },
       {
         id: 'vavuniya',
         name: 'Vavuniya',
         highlights: 'Northern Gateway, Ancient Buddhist & Hindu Ruins, Madhu Sanctuary Route',
-        coverImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b3/Vavuniya_Clock_Tower.jpg/1280px-Vavuniya_Clock_Tower.jpg',
         suggestedInterests: ['Historical & Culture']
       },
       {
         id: 'mullaitivu',
         name: 'Mullaitivu',
         highlights: 'Nayaru Lagoon, Unspoiled Coastal Beaches, Wildlife Habitats',
-        coverImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3a/Nayaru_Lagoon.jpg/1280px-Nayaru_Lagoon.jpg',
         suggestedInterests: ['Beach & Coastal', 'Historical & Culture']
       }
     ]
@@ -152,21 +152,21 @@ export const SRI_LANKA_DISTRICTS = [
         id: 'trincomalee',
         name: 'Trincomalee',
         highlights: 'Nilaveli Beach, Pigeon Island Snorkeling, Koneswaram Temple, Fort Frederick, Marble Beach',
-        coverImage: 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a2/Koneswaram_temple_view_from_Swami_Rock.jpg/1280px-Koneswaram_temple_view_from_Swami_Rock.jpg',
         suggestedInterests: ['Beach & Coastal', 'Temple & Heritage', 'Adventure & Surfing']
       },
       {
         id: 'batticaloa',
         name: 'Batticaloa',
         highlights: 'Pasikudah Bay Coral Reef, Batticaloa Dutch Fort, Singing Fish Lagoon, Kallady Lighthouse',
-        coverImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Batticaloa_Lighthouse_02.jpg/1280px-Batticaloa_Lighthouse_02.jpg',
         suggestedInterests: ['Beach & Coastal', 'Historical & Culture']
       },
       {
         id: 'ampara',
         name: 'Ampara',
         highlights: 'Arugam Bay (World Surfing Hub), Kumana National Park Safari, Kudumbigala Monastery',
-        coverImage: 'https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/Whiskey_Point_3.jpg/1280px-Whiskey_Point_3.jpg',
         suggestedInterests: ['Adventure & Surfing', 'Wildlife Safari', 'Beach & Coastal']
       }
     ]
@@ -178,14 +178,14 @@ export const SRI_LANKA_DISTRICTS = [
         id: 'kurunegala',
         name: 'Kurunegala',
         highlights: 'Elephant Rock (Ethagala), Ancient Citadel of Yapahuwa, Panduwasnuwara',
-        coverImage: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cf/Ethagala_Rock_Kurunegala.jpg/1280px-Ethagala_Rock_Kurunegala.jpg',
         suggestedInterests: ['Historical & Culture', 'Temple & Heritage']
       },
       {
         id: 'puttalam',
         name: 'Puttalam',
         highlights: 'Kalpitiya Dolphin & Kitesurfing Lagoon, Wilpattu Safari Gateway, Salt Pans',
-        coverImage: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Kalpitiya_beach.jpg/1280px-Kalpitiya_beach.jpg',
         suggestedInterests: ['Adventure & Surfing', 'Wildlife Safari', 'Beach & Coastal']
       }
     ]
@@ -197,14 +197,14 @@ export const SRI_LANKA_DISTRICTS = [
         id: 'anuradhapura',
         name: 'Anuradhapura',
         highlights: 'Jaya Sri Maha Bodhi, Ruwanwelisaya, Mihintale, Ancient Sacred City',
-        coverImage: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Ruwanwelisaya_Stupa_Anuradhapura_2017-10-15_%282%29.jpg/1280px-Ruwanwelisaya_Stupa_Anuradhapura_2017-10-15_%282%29.jpg',
         suggestedInterests: ['Temple & Heritage', 'Historical & Culture']
       },
       {
         id: 'polonnaruwa',
         name: 'Polonnaruwa',
         highlights: 'Gal Vihara Rock Sculptures, Parakrama Samudra, Ancient Royal Palaces, Minneriya Safari',
-        coverImage: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c6/Gal_Viharaya_02.jpg/1280px-Gal_Viharaya_02.jpg',
         suggestedInterests: ['Historical & Culture', 'Wildlife Safari']
       }
     ]
@@ -216,14 +216,14 @@ export const SRI_LANKA_DISTRICTS = [
         id: 'badulla',
         name: 'Badulla',
         highlights: 'Ella, Nine Arch Bridge, Little Adam\'s Peak, Dunhinda Falls, Lipton\'s Seat',
-        coverImage: 'https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Nine_arch_bridge%2C_Ella%2C_Sri_lanka.jpg/1280px-Nine_arch_bridge%2C_Ella%2C_Sri_lanka.jpg',
         suggestedInterests: ['Hill Country & Tea', 'Scenic Train Journeys', 'Adventure & Surfing']
       },
       {
         id: 'monaragala',
         name: 'Monaragala',
         highlights: 'Kataragama Sacred Shrine, Maligawila Buddha Statue, Yala National Park (East)',
-        coverImage: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Kataragama_Temple_Entrance.jpg/1280px-Kataragama_Temple_Entrance.jpg',
         suggestedInterests: ['Temple & Heritage', 'Wildlife Safari']
       }
     ]
@@ -235,14 +235,14 @@ export const SRI_LANKA_DISTRICTS = [
         id: 'ratnapura',
         name: 'Ratnapura',
         highlights: 'Adam\'s Peak (Sri Pada Sacred Mountain), Sinharaja Rainforest UNESCO, World Gem Mines',
-        coverImage: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/5/5b/Sri_Pada_Mountain_Sunrise.jpg/1280px-Sri_Pada_Mountain_Sunrise.jpg',
         suggestedInterests: ['Adventure & Surfing', 'Temple & Heritage', 'Wildlife Safari']
       },
       {
         id: 'kegalle',
         name: 'Kegalle',
         highlights: 'Pinnawala Elephant Orphanage & River Bathing, Bible Rock (Bathalegala)',
-        coverImage: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?auto=format&fit=crop&w=1200&q=80',
+        coverImage: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d3/Pinnawala_Elephants_in_Maha_Oya.jpg/1280px-Pinnawala_Elephants_in_Maha_Oya.jpg',
         suggestedInterests: ['Wildlife Safari', 'Historical & Culture']
       }
     ]
@@ -344,11 +344,11 @@ export default function CreateTripPage() {
   ];
 
   const sampleCovers = [
-    'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=1200&q=80', // Galle
-    'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=1200&q=80', // Sigiriya
-    'https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=1200&q=80', // Ella
-    'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=1200&q=80', // Kandy
-    'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=1200&q=80'  // Mirissa / Jaffna
+    'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Galle_Fort.jpg/1280px-Galle_Fort.jpg', // Galle
+    'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Sigiriya_Rock_Fortress_View_from_Pidurangala_Rock.jpg/1280px-Sigiriya_Rock_Fortress_View_from_Pidurangala_Rock.jpg', // Sigiriya
+    'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Nine_arch_bridge%2C_Ella%2C_Sri_lanka.jpg/1280px-Nine_arch_bridge%2C_Ella%2C_Sri_lanka.jpg', // Ella
+    'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/SL_Kandy_asv2020-01_img34_Sacred_Tooth_Temple.jpg/1280px-SL_Kandy_asv2020-01_img34_Sacred_Tooth_Temple.jpg', // Kandy
+    'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Coconut_tree_hills.jpg/1280px-Coconut_tree_hills.jpg'  // Mirissa
   ];
 
   // Update selection if URL param changes
@@ -623,65 +623,6 @@ export default function CreateTripPage() {
               <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
                 25 Districts of Sri Lanka
               </span>
-            </div>
-
-            {/* Featured Sri Lanka Places Quick Cards */}
-            <div className="space-y-2 pt-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Popular Places in Sri Lanka
-                </span>
-                <span className="text-slate-400 text-[11px]">Click a card to auto-fill trip</span>
-              </div>
-
-              <div className="flex items-center gap-3 overflow-x-auto pb-3 pt-1 scrollbar-thin">
-                {[
-                  { id: 'matale', name: 'Sigiriya Rock', district: 'Matale', img: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=400&q=80', tag: 'Ancient Fortress' },
-                  { id: 'galle', name: 'Galle Fort', district: 'Galle', img: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=400&q=80', tag: 'Colonial Beach' },
-                  { id: 'badulla', name: 'Ella Nine Arch', district: 'Badulla', img: 'https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=400&q=80', tag: 'Hill Country' },
-                  { id: 'kandy', name: 'Kandy Temple', district: 'Kandy', img: 'https://images.unsplash.com/photo-1548013146-72479768bada?auto=format&fit=crop&w=400&q=80', tag: 'Sacred Heritage' },
-                  { id: 'matara', name: 'Mirissa Coast', district: 'Matara', img: 'https://images.unsplash.com/photo-1588668214407-6ea9a6d8c272?auto=format&fit=crop&w=400&q=80', tag: 'Whale Watching' },
-                  { id: 'nuwara-eliya', name: 'Nuwara Eliya', district: 'Nuwara Eliya', img: 'https://images.unsplash.com/photo-1543731068-7e0f5beff43a?auto=format&fit=crop&w=400&q=80', tag: 'Tea Country' },
-                  { id: 'hambantota', name: 'Yala Safari', district: 'Hambantota', img: 'https://images.unsplash.com/photo-1534177616072-ef7dc120449d?auto=format&fit=crop&w=400&q=80', tag: 'Leopard & Wildlife' },
-                  { id: 'jaffna', name: 'Jaffna Coast', district: 'Jaffna', img: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80', tag: 'Northern Culture' },
-                ].map((place) => {
-                  const isSelected = selectedDistrictId === place.id && !isCustomDestination;
-                  return (
-                    <button
-                      key={place.id}
-                      type="button"
-                      onClick={() => handleDistrictChange({ target: { value: place.id } })}
-                      className={`relative shrink-0 w-36 h-28 rounded-2xl overflow-hidden border-2 text-left transition-all duration-300 group cursor-pointer ${
-                        isSelected
-                          ? 'border-indigo-600 ring-4 ring-indigo-500/25 scale-102 shadow-lg shadow-indigo-500/20'
-                          : 'border-slate-200 hover:border-indigo-400 opacity-90 hover:opacity-100 hover:scale-102'
-                      }`}
-                    >
-                      <img
-                        src={place.img}
-                        alt={place.name}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-transparent" />
-                      <div className="absolute top-1.5 right-1.5">
-                        {isSelected && (
-                          <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px] font-bold shadow-md">
-                            ✓
-                          </span>
-                        )}
-                      </div>
-                      <div className="absolute bottom-2 left-2 right-2 text-white">
-                        <span className="block text-[9px] font-bold uppercase tracking-wider text-amber-300 truncate">
-                          {place.tag}
-                        </span>
-                        <span className="block text-xs font-black truncate drop-shadow-sm">
-                          {place.name}
-                        </span>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">

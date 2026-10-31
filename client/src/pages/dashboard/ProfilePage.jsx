@@ -51,12 +51,12 @@ const PRESET_AVATARS = [
 
 // Preset scenery options for favorite places
 const PLACE_SCENERY_PRESETS = [
-  { name: 'Sigiriya Rock Fortress', url: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=800&q=80' },
-  { name: 'Nine Arch Bridge (Ella)', url: 'https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=800&q=80' },
-  { name: 'Mirissa Tropical Beach', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80' },
-  { name: 'Galle Colonial Fort', url: 'https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=800&q=80' },
-  { name: 'Nuwara Eliya Tea Hills', url: 'https://images.unsplash.com/photo-1543731068-7e0f5beff43a?auto=format&fit=crop&w=800&q=80' },
-  { name: 'Yala Wildlife Leopard', url: 'https://images.unsplash.com/photo-1534188753412-3e26d0d618d6?auto=format&fit=crop&w=800&q=80' }
+  { name: 'Sigiriya Rock Fortress', url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Sigiriya_Rock_Fortress_View_from_Pidurangala_Rock.jpg/1280px-Sigiriya_Rock_Fortress_View_from_Pidurangala_Rock.jpg' },
+  { name: 'Nine Arch Bridge (Ella)', url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Nine_arch_bridge%2C_Ella%2C_Sri_lanka.jpg/1280px-Nine_arch_bridge%2C_Ella%2C_Sri_lanka.jpg' },
+  { name: 'Mirissa Coconut Tree Hill', url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8d/Coconut_tree_hills.jpg/1280px-Coconut_tree_hills.jpg' },
+  { name: 'Galle Colonial Fort', url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Galle_Fort.jpg/1280px-Galle_Fort.jpg' },
+  { name: 'Nuwara Eliya Tea Hills', url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Sri_Lanka%2C_Tea_plantation_Nuwara_Eliya.jpg/1280px-Sri_Lanka%2C_Tea_plantation_Nuwara_Eliya.jpg' },
+  { name: 'Yala Wildlife Leopard', url: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Sri_Lankan_Leopard_At_Yala_National_Park.jpg/1280px-Sri_Lankan_Leopard_At_Yala_National_Park.jpg' }
 ];
 
 // Quick suggestions for first-time favorites (Sri Lanka highlights)

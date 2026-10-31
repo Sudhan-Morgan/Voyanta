@@ -1,23 +1,32 @@
 const Destination = require('../models/Destination');
 const SRI_LANKA_DESTINATIONS = require('../utils/sriLankaDestinationsData');
 
-// Helper to ensure all Sri Lanka destinations exist in MongoDB
+// Helper to ensure all Sri Lanka destinations exist and have updated real photos in MongoDB
 let isSeededChecked = false;
 const ensureAllDestinationsSeeded = async () => {
   try {
-    const count = await Destination.countDocuments();
-    if (count < SRI_LANKA_DESTINATIONS.length) {
-      for (const dest of SRI_LANKA_DESTINATIONS) {
-        await Destination.findOneAndUpdate(
-          { name: dest.name },
-          dest,
-          { upsert: true, new: true, setDefaultsOnInsert: true }
-        );
-      }
+    for (const dest of SRI_LANKA_DESTINATIONS) {
+      await Destination.findOneAndUpdate(
+        { name: dest.name },
+        {
+          $set: {
+            imageUrls: dest.imageUrls,
+            description: dest.description,
+            practicalTips: dest.practicalTips,
+            category: dest.category,
+            latitude: dest.latitude,
+            longitude: dest.longitude,
+            region: dest.region,
+            bestTimeToVisit: dest.bestTimeToVisit,
+            averageDailyBudget: dest.averageDailyBudget
+          }
+        },
+        { upsert: true, new: true, setDefaultsOnInsert: true }
+      );
     }
     isSeededChecked = true;
   } catch (err) {
-    console.error('Error auto-syncing destinations:', err);
+    console.error('Error auto-syncing destinations with real photos:', err);
   }
 };
 

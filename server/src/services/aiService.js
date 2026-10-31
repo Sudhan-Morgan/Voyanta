@@ -8,7 +8,7 @@
 const DESTINATION_KNOWLEDGE = {
   ella: {
     title: "Ella Hill Country Adventure",
-    coverImage: "https://images.unsplash.com/photo-1546708973-b339540b5162?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/90/Nine_arch_bridge%2C_Ella%2C_Sri_lanka.jpg/1280px-Nine_arch_bridge%2C_Ella%2C_Sri_lanka.jpg",
     highlights: ["Nine Arches Bridge", "Little Adam's Peak", "Ravana Falls", "Ella Rock hike", "Demodara Loop"],
     activitiesPool: [
       {
@@ -84,7 +84,7 @@ const DESTINATION_KNOWLEDGE = {
   },
   galle: {
     title: "Galle Colonial Heritage & Coastal Charms",
-    coverImage: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/77/Galle_Fort.jpg/1280px-Galle_Fort.jpg",
     highlights: ["Galle Fort Ramparts", "Galle Lighthouse", "Unawatuna Beach", "Dutch Reformed Church", "Maritime Museum"],
     activitiesPool: [
       {
@@ -151,7 +151,7 @@ const DESTINATION_KNOWLEDGE = {
   },
   kandy: {
     title: "Kandy Sacred Relics & Royal Valley",
-    coverImage: "https://images.unsplash.com/photo-1588598198321-9735fd52455b?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f3/SL_Kandy_asv2020-01_img34_Sacred_Tooth_Temple.jpg/1280px-SL_Kandy_asv2020-01_img34_Sacred_Tooth_Temple.jpg",
     highlights: ["Temple of the Sacred Tooth Relic", "Peradeniya Royal Botanical Gardens", "Kandy Lake", "Cultural Dance Show"],
     activitiesPool: [
       {
@@ -209,7 +209,7 @@ const DESTINATION_KNOWLEDGE = {
   },
   sigiriya: {
     title: "Sigiriya Ancient Citadel & Cultural Triangle",
-    coverImage: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=1200&q=80",
+    coverImage: "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Sigiriya_Rock_Fortress_View_from_Pidurangala_Rock.jpg/1280px-Sigiriya_Rock_Fortress_View_from_Pidurangala_Rock.jpg",
     highlights: ["Sigiriya Lion Rock Fortress", "Pidurangala Rock", "Dambulla Cave Temple", "Minneriya Elephant Safari"],
     activitiesPool: [
       {
@@ -478,7 +478,7 @@ const generateFallbackItinerary = (params) => {
     travelersCount: numTravelers,
     currency: curr,
     estimatedTotalCost: `${curr} ${finalTotalCost.toLocaleString()}`,
-    coverImage: blueprint?.coverImage || "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80",
+    coverImage: blueprint?.coverImage || "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Sigiriya_Rock_Fortress_View_from_Pidurangala_Rock.jpg/1280px-Sigiriya_Rock_Fortress_View_from_Pidurangala_Rock.jpg",
     summary: `A carefully designed ${daysCount}-day itinerary for ${destination} tuned for ${travelStyle} travel and staying strictly within your ${curr} ${targetTotalBudget.toLocaleString()} budget.`,
     highlights: blueprint?.highlights || [`Iconic ${destination} Landmarks`, "Authentic Local Cuisine", "Cultural Highlights", "Scenic Viewpoints"],
     packingChecklist: blueprint?.checklist || [

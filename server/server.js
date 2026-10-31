@@ -4,7 +4,9 @@ const dotenv = require('dotenv');
 const mongoose = require('mongoose');
 const connectDB = require('./src/config/db');
 
-// Load environment variables
+// Load environment variables (supports running from root or server dir)
+const path = require('path');
+dotenv.config({ path: path.join(__dirname, '.env') });
 dotenv.config();
 
 // Connect to MongoDB
@@ -45,10 +47,31 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Root API Welcome route
-app.get('/', (req, res) => {
-  res.send('Welcome to Voyanta API Service');
-});
+// Serve static client assets in production if client build exists
+const fs = require('fs');
+const path = require('path');
+const clientDistPath = path.join(__dirname, '../client/dist');
+
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+
+  // SPA fallback for all non-API routes
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+    const indexHtml = path.join(clientDistPath, 'index.html');
+    if (fs.existsSync(indexHtml)) {
+      return res.sendFile(indexHtml);
+    }
+    next();
+  });
+} else {
+  // Root API Welcome route when frontend is not bundled
+  app.get('/', (req, res) => {
+    res.send('Welcome to Voyanta API Service');
+  });
+}
 
 // 404 handler for unmatched routes
 app.use((req, res, next) => {
