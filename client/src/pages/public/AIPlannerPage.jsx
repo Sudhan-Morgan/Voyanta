@@ -302,11 +302,10 @@ export default function AIPlannerPage() {
                     key={dest.name}
                     type="button"
                     onClick={() => setDestination(dest.name)}
-                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                      destination.toLowerCase() === dest.name.toLowerCase()
+                    className={`px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${destination.toLowerCase() === dest.name.toLowerCase()
                         ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/25 scale-105 ring-2 ring-indigo-300'
                         : 'bg-slate-100 text-slate-700 hover:bg-slate-200/80 border border-slate-200/70'
-                    }`}
+                      }`}
                   >
                     📍 {dest.name}
                   </button>
@@ -439,11 +438,10 @@ export default function AIPlannerPage() {
                   <div
                     key={opt.id}
                     onClick={() => setBudget(opt.id)}
-                    className={`cursor-pointer p-4 rounded-2xl border transition-all ${
-                      budget === opt.id
+                    className={`cursor-pointer p-4 rounded-2xl border transition-all ${budget === opt.id
                         ? 'border-indigo-600 bg-indigo-50/50 ring-2 ring-indigo-500/20'
                         : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-bold text-sm text-slate-900">{opt.label}</span>
@@ -635,11 +633,10 @@ export default function AIPlannerPage() {
                     <button
                       key={day.dayNumber}
                       onClick={() => setActiveDayTab(day.dayNumber)}
-                      className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${
-                        activeDayTab === day.dayNumber
+                      className={`px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${activeDayTab === day.dayNumber
                           ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
                           : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-200'
-                      }`}
+                        }`}
                     >
                       Day {day.dayNumber} {day.date ? `(${day.date.split('-').slice(1).join('/')})` : ''}
                     </button>
@@ -808,7 +805,7 @@ export default function AIPlannerPage() {
                           <input
                             type="checkbox"
                             checked={!!checkedItems[item]}
-                            onChange={() => {}}
+                            onChange={() => { }}
                             className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
                           />
                           <span className={checkedItems[item] ? 'line-through text-slate-400' : ''}>
